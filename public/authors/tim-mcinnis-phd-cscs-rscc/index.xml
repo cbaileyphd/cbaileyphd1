@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tim McInnis, PhD, CSCS, RSCC | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/authors/tim-mcinnis-phd-cscs-rscc/</link>
+      <atom:link href="/authors/tim-mcinnis-phd-cscs-rscc/index.xml" rel="self" type="application/rss+xml" />
+    <description>Tim McInnis, PhD, CSCS, RSCC</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Mon, 12 Sep 2016 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Tim McInnis, PhD, CSCS, RSCC</title>
+      <link>/authors/tim-mcinnis-phd-cscs-rscc/</link>
+    </image>
+    
+    <item>
+      <title>Bat swing mechanical analysis with an inertial measurement unit: reliability and implications for athlete monitoring</title>
+      <link>/publication/zepprely/</link>
+      <pubDate>Mon, 12 Sep 2016 00:00:00 +0000</pubDate>
+      <guid>/publication/zepprely/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>A New Method For The Evaluation And Prediction Of Base Stealing Performance</title>
+      <link>/publication/basestealing/</link>
+      <pubDate>Tue, 01 Mar 2016 00:00:00 +0000</pubDate>
+      <guid>/publication/basestealing/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

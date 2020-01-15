@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Angus Burnett | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/authors/angus-burnett/</link>
+      <atom:link href="/authors/angus-burnett/index.xml" rel="self" type="application/rss+xml" />
+    <description>Angus Burnett</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Thu, 01 Oct 2015 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Angus Burnett</title>
+      <link>/authors/angus-burnett/</link>
+    </image>
+    
+    <item>
+      <title>Carry-over of force production symmetry in athletes of differing strength levels</title>
+      <link>/publication/carryover/</link>
+      <pubDate>Thu, 01 Oct 2015 00:00:00 +0000</pubDate>
+      <guid>/publication/carryover/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Force production asymmetry in male and female athletes of differing strength levels</title>
+      <link>/publication/fpaijspp/</link>
+      <pubDate>Thu, 01 Jan 2015 00:00:00 +0000</pubDate>
+      <guid>/publication/fpaijspp/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

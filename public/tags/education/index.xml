@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Education | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/tags/education/</link>
+      <atom:link href="/tags/education/index.xml" rel="self" type="application/rss+xml" />
+    <description>Education</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Thu, 20 Dec 2018 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Education</title>
+      <link>/tags/education/</link>
+    </image>
+    
+    <item>
+      <title>Making sense of student evaluations: A data science/text mining approach</title>
+      <link>/post/making-sense-of-student-evaluations-a-data-science-text-mining-approach/</link>
+      <pubDate>Thu, 20 Dec 2018 00:00:00 +0000</pubDate>
+      <guid>/post/making-sense-of-student-evaluations-a-data-science-text-mining-approach/</guid>
+      <description>
+&lt;script src=&#34;/rmarkdown-libs/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/wordcloud2/wordcloud.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/wordcloud2/wordcloud2-all.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/rmarkdown-libs/wordcloud2/hover.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/rmarkdown-libs/wordcloud2-binding/wordcloud2.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;p&gt;After every semester I find myself in the same situation, reading through student evaluations and comments trying to find some value in them. The quantitative section may be seemingly straightforward, with higher values being better, but they are often compared to and normalized to other courses that are completely different from yours. But at least they are objective. I usually struggle the most with the comments section. They always seem to be equal parts encouraging, frustrating, and contradicting. Encouraging comments usually provide some affirmation of my teaching methods, frustrating ones usually provide the opposite or say that my course is boring, and then I usually get a few comments that make no sense or contradict themselves. An example of each from this semester is below.&lt;/p&gt;
+&lt;div id=&#34;encouraging-examples&#34; class=&#34;section level5&#34;&gt;
+&lt;h5&gt;Encouraging examples:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;“I enjoyed the lab work. This helped explain the aspects taught in the class and allowed students to see and feel the results themselves.”
+&lt;ul&gt;
+&lt;li&gt;I have a very similar statement in my syllabus as to why we do in class activities. I try to focus on applied learning and we have a lot of in class activities.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;“he made you feel like you’re the one doing the lab tests even if it was just in the classroom. He was very interactive towards the students”&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;discouraging-example&#34; class=&#34;section level5&#34;&gt;
+&lt;h5&gt;Discouraging example:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;“very little class interaction during lecture”
+&lt;ul&gt;
+&lt;li&gt;I try to have an in class activity during every lecture that reinforces what we are discussing and hopefully encourages interaction. I walk around from group to group discussing the assignment and hopefully get a feel for how students are grasping the concepts. So this comment is frustrating.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;contradicting-example&#34; class=&#34;section level5&#34;&gt;
+&lt;h5&gt;Contradicting example:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;“This class was much more difficult than anticipated. I was intending for it to be my”leisure class&#34; as my course load this semester is rather intense, but that was not the case.&#34;
+&lt;ul&gt;
+&lt;li&gt;This was for a senior level course called “Quantitative Analysis.”&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-problem&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The problem&lt;/h2&gt;
+&lt;p&gt;It is very easy for me to only consider specific comments and forget all the other ones. This could be due to confirmation bias after reading a good comment or my frustration over a bad comment. Either way, it is difficult to get an overall course summary on what I did well and what needs to change from open ended statements.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;a-data-science-based-solution-text-mining&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;A Data Science based solution: Text Mining&lt;/h2&gt;
+&lt;p&gt;I recently learned about text mining and sentiment analysis in R and I’ve been looking for a real world opportunity to use it. Actually that was only part of my motivation for this. After seeing the word “boring” multiple times in my Quantitative Analysis course comments, I thought it would be funny if I made a wordcloud and that was one of the biggest words (meaning it was one of the most commonly appearing words). I thought I could frame the results and use it as motivation for future course development.&lt;/p&gt;
+&lt;p&gt;This is actually quite easy to do in R. Much like analyzing other data in R, you need to be able to read it in a format that is tab or comma delimited. I did this by copying and pasting all my comments into a text editor (Sublime Text) and saving it as a .txt file. After that everything was completed in R. I will share the results here, with my code imbedded in case you want to do this for your own courses or for some other application.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wordcloud&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://i.ibb.co/vw2SwVT/wc1.png&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;
+&lt;p&gt;I’ll show the finished product first. As you can see “boring” wasn’t one of the most used word. Many of the words are consistent with my teaching style. I try to focus on applied learning with labs and in class activities, so those words appear a lot. Other words appear that likely should have been filtered out since they are part of the course name. In this course, Exercise Testing and Prescription, the title likely results in the words “exercise” and “testing” usage frequency being inflated. My name probably should have been filtered out also.&lt;/p&gt;
+&lt;p&gt;##How the sauce is made
+Let’s take a look at how this is done and we can dive a little deeper as well. For this project we will need the tm and wordcloud2 packages.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: NLP&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(wordcloud2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we need to read our data in.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;EXRX_cloud&amp;lt;-readLines(&amp;quot;KINE4320.txt&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now this needs to be converted to a corpus so that it can be manipulated.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;EXRX_corpus&amp;lt;-Corpus(VectorSource(EXRX_cloud))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At this stage it would be a good idea to inspect() your corpus to make sure everything shows up correctly, but I am not going to do that here as it would be a lot of lines.&lt;/p&gt;
+&lt;p&gt;Currently, my corpus is set up is with line numbers, lots of punctuation (sometimes not), capitalized letters, and some other things that won’t work well for a wordcloud. So we will clean that up in the next few steps with the map function in the tm package.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##convert everythhing to lowercase
+EXRX_clean_corpus &amp;lt;- tm_map(EXRX_corpus,tolower)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_corpus, tolower): transformation drops
+## documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##remove the comment numbers. You should also notice that I am now using EXRX_clean_corpus inside of the map function and will be from now on.
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, removeNumbers)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removeNumbers): transformation
+## drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##remove the punctuation
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, removePunctuation)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removePunctuation):
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##Get rid of extra spaces
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, stripWhitespace)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, stripWhitespace):
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##remove stop words (the, that, etc.)
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, removeWords, stopwords())&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removeWords, stopwords()):
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##I am commenting out the next line of code, because I do not want to stem the document, but that is a common practice when creating a wordcloud. What stemming will do is shortening words to their roots and then combining all of those. From experience doing this, it doesn&amp;#39;t work well in this scenario. For example &amp;#39;statistics&amp;#39; becomes &amp;#39;statist&amp;#39; and those are very different things. So if you want to do that, here&amp;#39;s how you would.
+##EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, stemDocument)
+
+#Lastly, there are some words that aren&amp;#39;t necessarily stop words, but I don&amp;#39;t want them being counted. So I am factoring those out here.
+EXRX_clean_corpus&amp;lt;-tm_map(EXRX_clean_corpus, removeWords, c(&amp;quot;class&amp;quot;, &amp;quot;yes&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removeWords, c(&amp;quot;class&amp;quot;, :
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is another point were you should use the tm inspect function to check your work. Again, I’m not going to do it here because it will take up a lot of space. But you should inspect(EXRX_clean_corpus).&lt;/p&gt;
+&lt;p&gt;Now we can create the wordcloud. I am using the wordcloud2 package that will create this as html, but the wordcloud package will also work.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##turn the corpus we&amp;#39;ve been working with into a term document matrix
+tdm &amp;lt;- TermDocumentMatrix(EXRX_clean_corpus)
+l &amp;lt;- as.matrix(tdm)
+##sort it and make it a data frame
+x &amp;lt;- sort(rowSums(l),decreasing=TRUE)
+p &amp;lt;- data.frame(word = names(x),freq=x)
+#check it out
+head(p)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##              word freq
+## labs         labs   14
+## concepts concepts   11
+## students students   11
+## nothing   nothing   11
+## testing   testing   10
+## learning learning    9&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can see the frequency of words used.&lt;/p&gt;
+&lt;p&gt;Let’s make the actual wordcloud. It’s simple from this point. Since it is .html instead of a .png or .jpg, you can hover over each word to get the frequency of use.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wordcloud2(p)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:672px;height:480px;&#34; class=&#34;wordcloud2 html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;word&#34;:[&#34;labs&#34;,&#34;concepts&#34;,&#34;students&#34;,&#34;nothing&#34;,&#34;testing&#34;,&#34;learning&#34;,&#34;lectures&#34;,&#34;activities&#34;,&#34;assignments&#34;,&#34;none&#34;,&#34;information&#34;,&#34;think&#34;,&#34;lot&#34;,&#34;hands&#34;,&#34;really&#34;,&#34;powerpoints&#34;,&#34;help&#34;,&#34;many&#34;,&#34;apply&#34;,&#34;just&#34;,&#34;new&#34;,&#34;feel&#34;,&#34;lab&#34;,&#34;exercise&#34;,&#34;examples&#34;,&#34;material&#34;,&#34;helpful&#34;,&#34;review&#34;,&#34;detracted&#34;,&#34;helped&#34;,&#34;work&#34;,&#34;learned&#34;,&#34;methods&#34;,&#34;questions&#34;,&#34;exam&#34;,&#34;take&#34;,&#34;great&#34;,&#34;test&#34;,&#34;suggestions&#34;,&#34;understand&#34;,&#34;allowed&#34;,&#34;enjoyed&#34;,&#34;already&#34;,&#34;thinking&#34;,&#34;ways&#34;,&#34;interactive&#34;,&#34;like&#34;,&#34;made&#34;,&#34;tests&#34;,&#34;way&#34;,&#34;future&#34;,&#34;real&#34;,&#34;learn&#34;,&#34;bailey&#34;,&#34;good&#34;,&#34;online&#34;,&#34;given&#34;,&#34;notes&#34;,&#34;lecture&#34;,&#34;able&#34;,&#34;semester&#34;,&#34;group&#34;,&#34;stay&#34;,&#34;classes&#34;,&#34;book&#34;,&#34;exams&#34;,&#34;answers&#34;,&#34;maybe&#34;,&#34;least&#34;,&#34;practice&#34;,&#34;ideas&#34;,&#34;field&#34;,&#34;going&#34;,&#34;research&#34;,&#34;sure&#34;,&#34;aspects&#34;,&#34;taught&#34;,&#34;content&#34;,&#34;seen&#34;,&#34;things&#34;,&#34;introduced&#34;,&#34;different&#34;,&#34;informative&#34;,&#34;equipment&#34;,&#34;one&#34;,&#34;involved&#34;,&#34;actually&#34;,&#34;course&#34;,&#34;interesting&#34;,&#34;intellectually&#34;,&#34;provided&#34;,&#34;stimulating&#34;,&#34;much&#34;,&#34;practical&#34;,&#34;setting&#34;,&#34;world&#34;,&#34;inclass&#34;,&#34;beneficial&#34;,&#34;explained&#34;,&#34;well&#34;,&#34;complete&#34;,&#34;gave&#34;,&#34;based&#34;,&#34;ability&#34;,&#34;instructor&#34;,&#34;make&#34;,&#34;better&#34;,&#34;required&#34;,&#34;icas&#34;,&#34;fast&#34;,&#34;hard&#34;,&#34;presentation&#34;,&#34;along&#34;,&#34;speech&#34;,&#34;simply&#34;,&#34;available&#34;,&#34;day&#34;,&#34;slides&#34;,&#34;seemed&#34;,&#34;necessarily&#34;,&#34;grasp&#34;,&#34;sometimes&#34;,&#34;loved&#34;,&#34;wouldve&#34;,&#34;slower&#34;,&#34;suggest&#34;,&#34;topics&#34;,&#34;overall&#34;,&#34;however&#34;,&#34;info&#34;,&#34;ask&#34;,&#34;teach&#34;,&#34;can&#34;,&#34;half&#34;,&#34;exact&#34;,&#34;may&#34;,&#34;time&#34;,&#34;knowledge&#34;,&#34;specific&#34;,&#34;keep&#34;,&#34;homework&#34;,&#34;facts&#34;,&#34;explain&#34;,&#34;results&#34;,&#34;see&#34;,&#34;actions&#34;,&#34;basic&#34;,&#34;behind&#34;,&#34;broke&#34;,&#34;eyes&#34;,&#34;opened&#34;,&#34;scenes&#34;,&#34;action&#34;,&#34;clinic&#34;,&#34;gym&#34;,&#34;ive&#34;,&#34;say&#34;,&#34;stretched&#34;,&#34;wouldnt&#34;,&#34;programs&#34;,&#34;created&#34;,&#34;scenarios&#34;,&#34;common&#34;,&#34;mostly&#34;,&#34;particularly&#34;,&#34;sense&#34;,&#34;utilization&#34;,&#34;classroom&#34;,&#34;even&#34;,&#34;towards&#34;,&#34;youre&#34;,&#34;physiology&#34;,&#34;got&#34;,&#34;leave&#34;,&#34;tested&#34;,&#34;use&#34;,&#34;techniques&#34;,&#34;important&#34;,&#34;insight&#34;,&#34;various&#34;,&#34;especially&#34;,&#34;details&#34;,&#34;explanations&#34;,&#34;body&#34;,&#34;never&#34;,&#34;stretch&#34;,&#34;assist&#34;,&#34;career&#34;,&#34;others&#34;,&#34;brought&#34;,&#34;kinesiology&#34;,&#34;previous&#34;,&#34;life&#34;,&#34;used&#34;,&#34;related&#34;,&#34;excited&#34;,&#34;love&#34;,&#34;matter&#34;,&#34;missed&#34;,&#34;personal&#34;,&#34;since&#34;,&#34;thats&#34;,&#34;explaining&#34;,&#34;using&#34;,&#34;modules&#34;,&#34;blanks&#34;,&#34;canvas&#34;,&#34;creates&#34;,&#34;incentivizes&#34;,&#34;present&#34;,&#34;uploads&#34;,&#34;printing&#34;,&#34;versus&#34;,&#34;ica&#34;,&#34;contributed&#34;,&#34;independence&#34;,&#34;actual&#34;,&#34;calculations&#34;,&#34;chose&#34;,&#34;sports&#34;,&#34;whether&#34;,&#34;devices&#34;,&#34;procedure&#34;,&#34;throughout&#34;,&#34;diagnostic&#34;,&#34;aided&#34;,&#34;materiel&#34;,&#34;subjects&#34;,&#34;tough&#34;,&#34;understandable&#34;,&#34;person&#34;,&#34;visual&#34;,&#34;aspect&#34;,&#34;attending&#34;,&#34;fill&#34;,&#34;discussed&#34;,&#34;solve&#34;,&#34;engaging&#34;,&#34;fun&#34;,&#34;worksheets&#34;,&#34;blazed&#34;,&#34;entire&#34;,&#34;talked&#34;,&#34;teacher&#34;,&#34;dry&#34;,&#34;drystyle&#34;,&#34;energy&#34;,&#34;extra&#34;,&#34;interested&#34;,&#34;put&#34;,&#34;reason&#34;,&#34;similarly&#34;,&#34;follow&#34;,&#34;mixed&#34;,&#34;back&#34;,&#34;looking&#34;,&#34;usefull&#34;,&#34;vauge&#34;,&#34;distracting&#34;,&#34;didnt&#34;,&#34;due&#34;,&#34;miss&#34;,&#34;top&#34;,&#34;attendance&#34;,&#34;credit&#34;,&#34;sort&#34;,&#34;wish&#34;,&#34;powerpoint&#34;,&#34;best&#34;,&#34;debatable&#34;,&#34;equally&#34;,&#34;method&#34;,&#34;somewhat&#34;,&#34;times&#34;,&#34;alternatives&#34;,&#34;answer&#34;,&#34;managed&#34;,&#34;pictures&#34;,&#34;purchase&#34;,&#34;reading&#34;,&#34;confusing&#34;,&#34;wording&#34;,&#34;difficult&#34;,&#34;focused&#34;,&#34;gone&#34;,&#34;pertain&#34;,&#34;discussing&#34;,&#34;supposed&#34;,&#34;topic&#34;,&#34;working&#34;,&#34;assignment&#34;,&#34;giving&#34;,&#34;graded&#34;,&#34;prepared&#34;,&#34;providing&#34;,&#34;analyze&#34;,&#34;example&#34;,&#34;monotonous&#34;,&#34;enthusiasm&#34;,&#34;hurt&#34;,&#34;little&#34;,&#34;wouldn’t&#34;,&#34;clients&#34;,&#34;every&#34;,&#34;everything&#34;,&#34;trainers&#34;,&#34;thursday&#34;,&#34;adding&#34;,&#34;also&#34;,&#34;break&#34;,&#34;fiveminute&#34;,&#34;somewhere&#34;,&#34;though&#34;,&#34;allow&#34;,&#34;continuing&#34;,&#34;decompress&#34;,&#34;focus&#34;,&#34;higher&#34;,&#34;level&#34;,&#34;maintain&#34;,&#34;part&#34;,&#34;second&#34;,&#34;absolutely&#34;,&#34;classpowerpoints&#34;,&#34;covered&#34;,&#34;choose&#34;,&#34;differnt&#34;,&#34;extremly&#34;,&#34;professor&#34;,&#34;relatable&#34;,&#34;understanding&#34;,&#34;smart&#34;,&#34;instruction&#34;,&#34;supplemental&#34;,&#34;harder&#34;,&#34;job&#34;,&#34;presented&#34;,&#34;prof&#34;,&#34;teaching&#34;,&#34;everybody&#34;,&#34;needed&#34;,&#34;goes&#34;,&#34;instances&#34;,&#34;something&#34;,&#34;excel&#34;,&#34;expecting&#34;,&#34;show&#34;,&#34;thorough&#34;,&#34;wasnt&#34;,&#34;constructed&#34;,&#34;improving&#34;,&#34;advance&#34;,&#34;scheduled&#34;,&#34;week&#34;,&#34;majority&#34;,&#34;observe&#34;,&#34;realistic&#34;,&#34;cool&#34;,&#34;definitely&#34;,&#34;generally&#34;,&#34;get&#34;,&#34;thought&#34;,&#34;’d&#34;,&#34;careers&#34;,&#34;carry&#34;,&#34;hybrid&#34;,&#34;come&#34;,&#34;error&#34;,&#34;less&#34;,&#34;matching&#34;,&#34;room&#34;,&#34;situations&#34;,&#34;specificity&#34;,&#34;stem&#34;,&#34;theres&#34;,&#34;reasoning&#34;,&#34;requirements&#34;,&#34;scenario&#34;,&#34;handson&#34;,&#34;learners&#34;,&#34;getting&#34;,&#34;led&#34;,&#34;unclear&#34;,&#34;wrong&#34;,&#34;afternoon&#34;,&#34;courses&#34;,&#34;extend&#34;,&#34;interval&#34;,&#34;morning&#34;,&#34;till&#34;,&#34;usually&#34;,&#34;leads&#34;,&#34;skipping&#34;,&#34;application&#34;,&#34;concise&#34;,&#34;still&#34;,&#34;reword&#34;,&#34;instead&#34;,&#34;long&#34;,&#34;stuff&#34;,&#34;aside&#34;,&#34;find&#34;,&#34;ica’s&#34;,&#34;task&#34;,&#34;amount&#34;,&#34;aware&#34;,&#34;despite&#34;,&#34;improvement&#34;,&#34;lesser&#34;,&#34;mentioned&#34;,&#34;overwhelming&#34;,&#34;prepare&#34;,&#34;provide&#34;,&#34;retaining&#34;,&#34;section&#34;,&#34;sheet&#34;,&#34;upcoming&#34;,&#34;view&#34;,&#34;weighed&#34;,&#34;listing&#34;,&#34;wonderful&#34;,&#34;engagement&#34;,&#34;grades&#34;,&#34;improve&#34;,&#34;involve&#34;],&#34;freq&#34;:[14,11,11,11,10,9,9,8,8,8,7,7,6,6,6,6,6,5,5,5,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],&#34;fontFamily&#34;:&#34;Segoe UI&#34;,&#34;fontWeight&#34;:&#34;bold&#34;,&#34;color&#34;:&#34;random-dark&#34;,&#34;minSize&#34;:0,&#34;weightFactor&#34;:12.8571428571429,&#34;backgroundColor&#34;:&#34;white&#34;,&#34;gridSize&#34;:0,&#34;minRotation&#34;:-0.785398163397448,&#34;maxRotation&#34;:0.785398163397448,&#34;shuffle&#34;:true,&#34;rotateRatio&#34;:0.4,&#34;shape&#34;:&#34;circle&#34;,&#34;ellipticity&#34;:0.65,&#34;figBase64&#34;:null,&#34;hover&#34;:null},&#34;evals&#34;:[],&#34;jsHooks&#34;:{&#34;render&#34;:[{&#34;code&#34;:&#34;function(el,x){\n                        console.log(123);\n                        if(!iii){\n                          window.location.reload();\n                          iii = False;\n\n                        }\n  }&#34;,&#34;data&#34;:null}]}}&lt;/script&gt;
+This looks pretty cool and it is a good way to visualize key terms used frequently. The size of the words are representative of the amount of times they were used. This should sound familiar to a bar plot from a visualization standpoint. A bar plot may not be as visually appealing, and it won’t be able to display near as many words, but it’s arguably easier to interpret.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;barplot(p[1:10,]$freq, las = 2, names.arg = p[1:10,]$word,
+        col =&amp;quot;springgreen&amp;quot;, main =&amp;quot;Most frequent words&amp;quot;,
+        ylab = &amp;quot;Word frequencies&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-12-20-making-sense-of-student-evaluations-a-data-science-text-mining-approach_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Most of this makes since. I focus a lot on applied learning in this class so they do a lot of “in class actvities” and labs. I probably should have filtered out the words “nothing” and “detracted” since they are responding to a question about what detracted from their learning at one point. Many of those answers were “nothing.”&lt;/p&gt;
+&lt;p&gt;The last bit of exploratory analysis that I will do is correlation. I will specifically look for the words that are most correlated with these words that appear the most and I will set a limit of 0.3 (low end of moderate r value), so that I only see words that correlate higher than that. I will start with the word “labs,” since it is the most commonly used word.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;findAssocs(tdm, terms = &amp;quot;labs&amp;quot;, corlimit = 0.3)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $labs
+##    hands  excited     love   matter   missed personal    since    thats 
+##     0.60     0.50     0.50     0.50     0.50     0.50     0.50     0.50 
+##      one 
+##     0.34&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looking at the results, this mostly makes sense. I’m assuming “hands” was part of “hands on” before the corpus was cleaned. The words “excited” and “love” being associated with “labs” is probably a good thing. But the word “missed” being associated at the same value (r = 0.50) means that at least a few people made comments about missing labs.&lt;/p&gt;
+&lt;p&gt;For me, this is a much more objective way to interpret my evaluations with the added benefit of removing any potential bias I may have when I just read through the comments. This only really works with large classes and if you have a high response rate on your evaluations. If you have a small class size or a small number of responses, this really isn’t necessary.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

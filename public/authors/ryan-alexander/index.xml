@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ryan ALexander | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/authors/ryan-alexander/</link>
+      <atom:link href="/authors/ryan-alexander/index.xml" rel="self" type="application/rss+xml" />
+    <description>Ryan ALexander</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Wed, 24 Apr 2013 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Ryan ALexander</title>
+      <link>/authors/ryan-alexander/</link>
+    </image>
+    
+    <item>
+      <title>Isometric force production symmetry and jumping performance in college athletes</title>
+      <link>/publication/ipfsi/</link>
+      <pubDate>Wed, 24 Apr 2013 00:00:00 +0000</pubDate>
+      <guid>/publication/ipfsi/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

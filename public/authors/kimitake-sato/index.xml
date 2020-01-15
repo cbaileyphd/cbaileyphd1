@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kimitake Sato | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/authors/kimitake-sato/</link>
+      <atom:link href="/authors/kimitake-sato/index.xml" rel="self" type="application/rss+xml" />
+    <description>Kimitake Sato</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 01 Dec 2019 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Kimitake Sato</title>
+      <link>/authors/kimitake-sato/</link>
+    </image>
+    
+    <item>
+      <title>Simulating Fatigue in Squat Jumps</title>
+      <link>/publication/simfatigue/</link>
+      <pubDate>Sun, 01 Dec 2019 00:00:00 +0000</pubDate>
+      <guid>/publication/simfatigue/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Carry-over of force production symmetry in athletes of differing strength levels</title>
+      <link>/publication/carryover/</link>
+      <pubDate>Thu, 01 Oct 2015 00:00:00 +0000</pubDate>
+      <guid>/publication/carryover/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Force production asymmetry in male and female athletes of differing strength levels</title>
+      <link>/publication/fpaijspp/</link>
+      <pubDate>Thu, 01 Jan 2015 00:00:00 +0000</pubDate>
+      <guid>/publication/fpaijspp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>The effects of strength training on isometric force production symmetry in recreational athletes</title>
+      <link>/publication/ipfsistrength/</link>
+      <pubDate>Wed, 01 Jan 2014 00:00:00 +0000</pubDate>
+      <guid>/publication/ipfsistrength/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Isometric force production symmetry and jumping performance in college athletes</title>
+      <link>/publication/ipfsi/</link>
+      <pubDate>Wed, 24 Apr 2013 00:00:00 +0000</pubDate>
+      <guid>/publication/ipfsi/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

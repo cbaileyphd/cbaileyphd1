@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Michael H. Stone | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/authors/michael-h.-stone/</link>
+      <atom:link href="/authors/michael-h.-stone/index.xml" rel="self" type="application/rss+xml" />
+    <description>Michael H. Stone</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sun, 01 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Michael H. Stone</title>
+      <link>/authors/michael-h.-stone/</link>
+    </image>
+    
+    <item>
+      <title>Influence of Sex and Maximum Strength on Reactive Strength Index-Modified</title>
+      <link>/publication/rsisex/</link>
+      <pubDate>Sun, 01 Sep 2019 00:00:00 +0000</pubDate>
+      <guid>/publication/rsisex/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Carry-over of force production symmetry in athletes of differing strength levels</title>
+      <link>/publication/carryover/</link>
+      <pubDate>Thu, 01 Oct 2015 00:00:00 +0000</pubDate>
+      <guid>/publication/carryover/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Force production asymmetry in male and female athletes of differing strength levels</title>
+      <link>/publication/fpaijspp/</link>
+      <pubDate>Thu, 01 Jan 2015 00:00:00 +0000</pubDate>
+      <guid>/publication/fpaijspp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Isometric force production symmetry and jumping performance in college athletes</title>
+      <link>/publication/ipfsi/</link>
+      <pubDate>Wed, 24 Apr 2013 00:00:00 +0000</pubDate>
+      <guid>/publication/ipfsi/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

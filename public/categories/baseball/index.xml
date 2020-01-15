@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Baseball | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/categories/baseball/</link>
+      <atom:link href="/categories/baseball/index.xml" rel="self" type="application/rss+xml" />
+    <description>Baseball</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Wed, 28 Nov 2018 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Baseball</title>
+      <link>/categories/baseball/</link>
+    </image>
+    
+    <item>
+      <title>Bat Swing GRF Part 2: Analysis in R</title>
+      <link>/post/bat-swing-grf-part-2-analysis-in-r/</link>
+      <pubDate>Wed, 28 Nov 2018 00:00:00 +0000</pubDate>
+      <guid>/post/bat-swing-grf-part-2-analysis-in-r/</guid>
+      <description>
+
+
+&lt;p&gt;Prior to analysis, these trials have already been cleaned. By that I mean that only the force production necessary for this movement are present in the data. There is no blank space or data with the athletes simply standing on the force plate. As a result of that, the analysis is much easier, but the force values of each force plate cannot be summed since the time has been altered (trimmed at the beginning or the end). Each athlete in this data set completed 3 trials and I’ve removed the name of one of them so it can be used as an example here.&lt;/p&gt;
+&lt;div id=&#34;read-your-data-in&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Read your data in&lt;/h2&gt;
+&lt;p&gt;First we need to read in the file. You can name assign it whatever name you want. I always pick something short.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;F1&amp;lt;-read.csv(&amp;quot;Player1.csv&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next, since these force plates are biaxial (vertical (GRFz) and mediolateral (GRFx) in this case), I want to get the resultant force produced. I’ll do that with Pythagorean theorem and assign it to a variable name for each trial and each leg (drive leg (DL) and stride leg (SL).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;get-the-resultant-forces&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Get the resultant forces&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;F1$DLRes1&amp;lt;-sqrt(F1$GRFzDL1^2 + F1$GRFxDL1^2)
+F1$SLRes1&amp;lt;-sqrt(F1$GRFzSL1^2 + F1$GRFxSL1^2)
+F1$DLRes2&amp;lt;-sqrt(F1$GRFzDL2^2 + F1$GRFxDL2^2)
+F1$SLRes2&amp;lt;-sqrt(F1$GRFzSL2^2 + F1$GRFxSL2^2)
+F1$DLRes3&amp;lt;-sqrt(F1$GRFzDL3^2 + F1$GRFxDL3^2)
+F1$SLRes3&amp;lt;-sqrt(F1$GRFzSL3^2 + F1$GRFxSL3^2)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;calculating-the-variables-of-interest&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Calculating the variables of interest&lt;/h2&gt;
+&lt;p&gt;Now lets get to performing the analysis. Caluclating peak force (PPF) is fairly simple. We will also calclate the time when it occurs (PFt), which we will need for the RFD calculation later. This is also fairly simple in that we are asking for the time which the resultant force is equal to the varialbe we just assigned to PPF or peak force. The only trick here is the addition of the [1]-1 at the end. The reason that is there is so that we pull the first occurence of this event. If the same exact value appears more than once, your code will throw an error. This does happen sometimes with consecutive values when you sample at high rates. Adding this in will prevent those issues.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PF &amp;lt;- max(F1$DLRes1, na.rm = TRUE)
+print(PF)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 894.4183&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PFt &amp;lt;- F1$Time1[which(F1$DLRes1==PF)[1]-1] &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now let’s work on RFD. This will be calculated as the slope of the line from the initial force produced to the peak force. So this will be rise over run (change in force/change in time). Meaning we will need to calculate those first. We will start with the initial force produced (FInit) and the time at which it is produced (FInitT). Here we are simply calling for the first value and then for the time which that force value occurs.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;FInit&amp;lt;- F1$DLRes1[1]
+FInitT &amp;lt;- F1$Time1[which(F1$DLRes1==FInit)]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We already have the time which PF occurs, so now we just need to calculate the chage in Force and the change in time and divide them. Again, we’ll print RFD to check it.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;changeT &amp;lt;- PFt + FInitT
+changeF &amp;lt;- PF - FInit
+RFD &amp;lt;- changeF/changeT
+print(RFD)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 1463.233&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To calculate impulse, we will need the minimum values (force and time) which occur at the end of the drive leg f/t curve when the weight shift occurs. We need this as an end point marker to get the area under the curce (AUC). The time when the minimum force occurs will need to have the [1]-1 at the end similar to the PFt variable.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Fmin &amp;lt;- min(F1$DLRes1,na.rm = TRUE)
+Fmint &amp;lt;- F1$Time1[which(F1$DLRes1==Fmin)[1]-1]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can caluclate the AUC with the help of the MESS package. In order to calculate it, we will need several arguments including: what are the x and y values, from what point to what point do we want to calculate the area for and the type. Force-time curves are almost always set up with time on the x axis and force on the y axis, so that gives us the information for the first part. The from and to are going to be the initial time and minimum time already assigned. We will use linear for the type.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(MESS)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: geepack&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: geeM&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: Matrix&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Impulse &amp;lt;- auc(F1$Time1, F1$DLRes1, from = FInitT, to = Fmint, type = c(&amp;quot;linear&amp;quot;))
+print(Impulse)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 555.1382&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That’s pretty much it for the drive leg. This can be repeated for additional trials, but you’ll need to change the assignments slightly. I do this with numbers at the end, and sometimes letters (b to indicate stride leg).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PF2 &amp;lt;- max(F1$DLRes2, na.rm = TRUE)
+PFt2 &amp;lt;- F1$Time2[which(F1$DLRes2==PF2)[1]-1]                     
+FInit2&amp;lt;- F1$DLRes2[1]
+FInitT2 &amp;lt;- F1$Time2[which(F1$DLRes2==FInit2)]
+Fmin2 &amp;lt;- min(F1$DLRes2,na.rm = TRUE)
+Fmint2 &amp;lt;- F1$Time2[which(F1$DLRes2==Fmin2)[1]-1]
+changeT2 &amp;lt;- PFt2 + FInitT2
+changeF2 &amp;lt;- PF2 - FInit2
+RFD2 &amp;lt;- changeF2/changeT2
+Impulse2 &amp;lt;- auc(F1$Time2, F1$DLRes2, from = FInitT2, to = Fmint2, type = c(&amp;quot;linear&amp;quot;))
+
+PF3 &amp;lt;- max(F1$DLRes3, na.rm = TRUE)
+PFt3 &amp;lt;- F1$Time3[which(F1$DLRes3==PF3)[1]-1]                     
+FInit3&amp;lt;- F1$DLRes3[1]
+FInitT3 &amp;lt;- F1$Time3[which(F1$DLRes3==FInit3)]
+Fmin3 &amp;lt;- min(F1$DLRes3,na.rm = TRUE)
+Fmint3 &amp;lt;- F1$Time3[which(F1$DLRes3==Fmin3)[1]-1]
+changeT3 &amp;lt;- PFt3 + FInitT3
+changeF3 &amp;lt;- PF3 - FInit3
+RFD3 &amp;lt;- changeF3/changeT3
+Impulse3 &amp;lt;- auc(F1$Time3, F1$DLRes3, from = FInitT3, to = Fmint3, type = c(&amp;quot;linear&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The stride leg is almost identical in analysis, but the impulse arguments will need to be changed. Specifically, we want to get the area from the initial force produced to the final time since these trials have already been cleaned. That is acheived by the max(F1$Timeb) command.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PF1b &amp;lt;- max(F1$SLRes1, na.rm = TRUE)
+PFt1b &amp;lt;- F1$Time1b[which(F1$SLRes1==PF1b)[1]-1]                     
+FInit1b&amp;lt;- F1$SLRes1[1]
+FInitT1b &amp;lt;- F1$Time1b[which(F1$SLRes1==FInit1b)]
+Fmin1b &amp;lt;- min(F1$SLRes1,na.rm = TRUE)
+Fmint1b &amp;lt;- F1$Time1b[which(F1$SLRes1==Fmin1b)]
+changeT1b &amp;lt;- PFt1b + FInitT1b
+changeF1b &amp;lt;- PF1b - FInit1b
+RFD1b &amp;lt;- changeF1b/changeT1b
+Impulse1b &amp;lt;- auc(F1$Time1b, F1$SLRes1, from = FInitT1b, to = max(F1$Time1b, na.rm = TRUE), type = c(&amp;quot;linear&amp;quot;))
+
+PF2b &amp;lt;- max(F1$SLRes2, na.rm = TRUE)
+PFt2b &amp;lt;- F1$Time2b[which(F1$SLRes2==PF2b)[1]-1]                     
+FInit2b&amp;lt;- F1$SLRes2[1]
+FInitT2b &amp;lt;- F1$Time2b[which(F1$SLRes2==FInit2b)]
+Fmin2b &amp;lt;- min(F1$SLRes2,na.rm = TRUE)
+Fmint2b &amp;lt;- F1$Time2b[which(F1$SLRes2==Fmin2b)]
+changeT2b &amp;lt;- PFt2b + FInitT2b
+changeF2b &amp;lt;- PF2b - FInit2b
+RFD2b &amp;lt;- changeF2b/changeT2b
+Impulse2b &amp;lt;- auc(F1$Time2b, F1$SLRes2, from = FInitT2b, to = max(F1$Time2b, na.rm = TRUE), type = c(&amp;quot;linear&amp;quot;))
+
+PF3b &amp;lt;- max(F1$SLRes3, na.rm = TRUE)
+PFt3b &amp;lt;- F1$Time3b[which(F1$SLRes3==PF3b)[1]-1]                     
+FInit3b&amp;lt;- F1$SLRes3[1]
+FInitT3b &amp;lt;- F1$Time3b[which(F1$SLRes3==FInit3b)]
+Fmin3b &amp;lt;- min(F1$SLRes3,na.rm = TRUE)
+Fmint3b &amp;lt;- F1$Time3b[which(F1$SLRes3==Fmin3b)]
+changeT3b &amp;lt;- PFt3b + FInitT3b
+changeF3b &amp;lt;- PF3b - FInit3b
+RFD3b &amp;lt;- changeF3b/changeT3b
+Impulse3b &amp;lt;- auc(F1$Time3b, F1$SLRes3, from = FInitT3b, to = max(F1$Time3b, na.rm = TRUE), type = c(&amp;quot;linear&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;getting-the-means-combining-them-into-a-data-frame&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Getting the means &amp;amp; combining them into a data frame&lt;/h2&gt;
+&lt;p&gt;Now, we need to get the average of the 3 trials for each variable. I do that when I put it into a data frame for each leg.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Player1DL&amp;lt;- data.frame(DL.PF = (PF+PF2+PF3)/3,
+                      DL.RFD = (RFD+RFD2+RFD3)/3,
+                      DL.Impulse = (Impulse+Impulse2+Impulse3)/3)
+
+Player1SL&amp;lt;- data.frame(SL.PF = (PF1b+PF2b+PF3b)/3,
+                       SL.RFD = (RFD1b+RFD2b+RFD3b)/3,
+                       SL.Impulse = (Impulse1b+Impulse2b+Impulse3b)/3)
+
+print(Player1DL)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      DL.PF   DL.RFD DL.Impulse
+## 1 895.8249 1371.313   569.6043&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can combine these into one data frame.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Player1&amp;lt;-cbind(Player1DL, Player1SL)
+print(Player1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      DL.PF   DL.RFD DL.Impulse    SL.PF   SL.RFD SL.Impulse
+## 1 895.8249 1371.313   569.6043 1204.453 3972.014   326.8253&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;combining-individual-players-data-together-and-creating-a-summary-file&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Combining individual players’ data together and creating a summary file&lt;/h2&gt;
+&lt;p&gt;That’s pretty much it. It’s now just wash, rinse, and repeat for additional players. Then if want to combine all their data into one data frame, you can do so with the row bind command and separate each player name by a comma. I only have one here, because that’s all I’m using in this example.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Data &amp;lt;- data.frame(rbind(Player1))
+##this should be the same as above since we didn&amp;#39;t add any additional players.
+print(Data)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      DL.PF   DL.RFD DL.Impulse    SL.PF   SL.RFD SL.Impulse
+## 1 895.8249 1371.313   569.6043 1204.453 3972.014   326.8253&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can then write your data to a csv file if you wish. It will save in your working directory or wherever you wish if you indicate the file path.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;write.csv(Data,file = &amp;#39;BatswingGRFData.csv&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Bat Swing Ground Reaction Forces Part 1</title>
+      <link>/post/bat-swing-ground-reaction-forces-part-1/</link>
+      <pubDate>Wed, 28 Nov 2018 00:00:00 +0000</pubDate>
+      <guid>/post/bat-swing-ground-reaction-forces-part-1/</guid>
+      <description>
+
+
+&lt;div id=&#34;similarities-in-force-time-curves&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Similarities in Force-Time Curves&lt;/h2&gt;
+&lt;p&gt;Monitoring of jumping ground reaction force (GRF), especially in the vertical direction (vGRF) is becoming more common these days with more affordable force plate options and software. If you are willing to learn and put in the effort, you can design your own force-time curve analysis programs in R or python and avoid the budget hit. Matt Sams created an [open source vertical jump analysis project] (&lt;a href=&#34;https://www.researchgate.net/project/Open-source-vertical-jump-analysis-script&#34; class=&#34;uri&#34;&gt;https://www.researchgate.net/project/Open-source-vertical-jump-analysis-script&lt;/a&gt;) for this purpose, coded in R with a shiny app.&lt;/p&gt;
+&lt;p&gt;Jump monitoring is quite popular due to its quick and easy of collection that doesn’t cause excessive fatigue, but also due to its relationship with other performance variables (&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/15320676&#34;&gt;Carlock, 2004&lt;/a&gt;, &lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/19826298&#34;&gt;Kale, 2009&lt;/a&gt;, &lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/21993034&#34;&gt;Shalfawi, 2011&lt;/a&gt;, &lt;a href=&#34;https://www.researchgate.net/publication/8153735_The_Importance_of_Isometric_Maximum_Strength_and_Peak_Rate-of-Force_Development_in_Sprint_Cycling&#34;&gt;Stone, 2004&lt;/a&gt;). These relationships can be evaluated by Pearson’s r values and seen in scatter plots, but the similarities can also be seen by visual inspection of the force-time curve characteristics. Check out the images below of squat jump and snatch (from the knee) force-time curves plotted in R from a single Bertec 6040 force plate collecting at 1000 Hz.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;SJ.png&#34; /&gt;
+&lt;img src=&#34;Snatch.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;If the snatch f/t curve wasn’t labeled, you might confuse if for a jump. To be clear these are not normalized for time, they just look that similar. If snatch was coming from the floor, it would look very similar to a CMJ with the countermovement added. It’s no surprise that we can find lots of statistical and practical relationships between weightlifting and jumping performance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;collecting-the-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Collecting the Data&lt;/h2&gt;
+&lt;p&gt;Getting on to the topic at hand and title of this post, while at LaGrange College, we collected jumps on a weekly basis for nearly 2 years with our baseball team. I was collecting these because baseball is a “strength/power” sport and vertical jumping ability is usually a good marker of power, but specific performance decreases may also be indicative of accumulated fatigue, giving it added utility for athlete monitoring. While considering the relationship between hitting performance and jumping ability, I realized that I didn’t really know what a bat swing f/t curve looked like. When I looked at studies on hitting vGRF, they don’t publish images of the f/t curves. So, I decided to make one. Actually, I planned a larger study along with it looking at asymmetry and ball exit velocity, but this is how it started.&lt;/p&gt;
+&lt;p&gt;At LaGrange we had a few force plates, and the portable biaxial PASCOs would worked best for this set up (&lt;a href=&#34;https://www.pasco.com/prodCatalog/PS/PS-2142_pasport-2-axis-force-platform/index.cfm&#34;&gt;model 2142&lt;/a&gt;). They sample up to 1000 Hz, you can move them around and building a platform around them like a batter’s box was fairly easy (an image and a gif of the setup below). In order to control for the variation of reacting to pitch location, they hit off of a tee and self-selected its height. The back leg (drive leg) force plate was stationary, but the platform was made so that the stride leg force plate could be adjusted for stride length and location (changes in x,y).&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;Picture1.png&#34; /&gt;
+&lt;img src=&#34;BSgrf.gif&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;bat-swing-force-time-curve&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Bat Swing Force-Time Curve&lt;/h3&gt;
+&lt;p&gt;Without further ado, the resulting force-time curve from the two force plates is below. On its own, the stride leg force-time curve looks similar to a jump, but the force magnitudes are lower. Keep in mind that the magnitude should be close to half the value, since we are dividing it over 2 force plates. That being said, at some point a weight shift will occur (&lt;a href=&#34;https://www.amazon.com/High-tech-hitting-Science-vs-tradition/dp/0314021663&#34;&gt;DeRenne, 1993&lt;/a&gt;, &lt;a href=&#34;https://www.amazon.com/Louisville-Slugger%C2%AE-Complete-Hitting-Faults/dp/0809298023&#34;&gt;Gola &amp;amp; Monteleone, 2001&lt;/a&gt;, &lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/22303780&#34;&gt;Fortenbaugh et al., 2011&lt;/a&gt;, &lt;a href=&#34;https://www.amazon.com/Don-Mattinglys-Hitting-Simple-Batting/dp/0312366205&#34;&gt;Mattingly &amp;amp; Rosenthal, 2007&lt;/a&gt;), which will result in similar force production values on a single force plate. With the weight shift in mind, it makes more sense to relate the drive leg to the propulsive phase of a jump and the stride leg braking phase to the landing phase of a jump.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;ftcurve.png&#34; /&gt;
+#### GRF Analysis in R
+If you are interested in how the GRF data were analyzed, you can find my code in &lt;a href=&#34;Bat%20swing%20GRF%20analysis%20code&#34;&gt;part 2 of this post&lt;/a&gt;. The data were collected with PASCO’s Capstone software and files were exported as csv. Analysis took place in R to derive peak force, rate of force development (RFD), and impulse.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;reliability&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Reliability&lt;/h2&gt;
+&lt;p&gt;Much like any other performance data that we monitor, reliability should be evaluated. Looking at the relative reliability in the form of the intraclass correlation [3,1] (with 95% confidence intervals), it’s not too bad. Depending on the reference you use, you might say all are acceptable values. But there is a noticeable trend that the stride leg values are less reliable than the drive leg values. Going back to an earlier comment on the similarities between the stride leg braking phase and the landing phase of a jump, this reliability finding is also consistent. Well, jump landings may be less reliable than the stride leg braking phase, but the trend is the same.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;knitr::kable(ICC)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Var&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;ICC&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;DL PF&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0.952 [0.888 - 0.383]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;SL PF&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0.725 [0.474 - 0.891]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;DL RFD&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0.685 [0.399 - 0.874]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;SL RFD&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0.773 [0.550 - 0.912]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;DL Imp&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0.904 [0.787 - 0.965]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;SL Imp&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0.756 [0.522 - 0.904]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Looking at our absolute measures of reliability (coefficient of variation), we see that RFD is not so reliable. Again, this is similar to jump data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;knitr::kable(CV)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Var&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;CV&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;DL PF&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.81%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;SL PF&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12.6%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;DL RFD&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;37.77%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;SL RFD&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;44.88%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;DL Imp&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;12.36%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;SL Imp&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;14.67%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Based on these findings, it may be worthwhile to collect data on peak force and impulse from a monitoring standpoint. But we should probably stay away from RFD and question the data we have from the the stride leg. While the stride leg reliability wasn’t terrible here, it was noticeably worse than the drive leg. Much like jump landings, poor reliability could kill our data or lead us to making an incorrect decision. We should regularly evaluate reliability at a minimum. Checking once and assuming it stays the same may not be acceptable in this case.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;references&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/15320676&#34;&gt;Carlock, J.M., Smith, S.L., Hartman, M.J., Morris, R.T., Ciroslan, D.A., Pierce, K.C.,…(2004). The relationship between vertical jump power estimates and weightlifting ability: a field-test approach. Journal of Strength and Conditioning Research, 18(3), 534-539.&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.amazon.com/High-tech-hitting-Science-vs-tradition/dp/0314021663&#34;&gt;DeRenne, C. (1993). High-tech hitting: Science vs. tradition. West: St. Paul.&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/22303780&#34;&gt;Fortenbaugh, D., Flesig, G., Onar-Thomas, A., Asfour, S. (2011). The effect of pitch type on ground reaction forces in the baseball swing. Sports Biomech, 10(4):270-279.&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.amazon.com/Louisville-Slugger%C2%AE-Complete-Hitting-Faults/dp/0809298023&#34;&gt;Gola, M., &amp;amp; Monteleone, J. (2001). The complete book of hitting faults and fixes. New York: McGraw-Hill&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/19826298&#34;&gt;Kale, M., Asci, A., Bayrak, C., &amp;amp; Acikada, C. (2009). Relationships among jumping performances and sprint parameters during maximum speed phase in sprinters. Journal of Strength and Conditioning Research, 23(8), 2272-2279. doi: 10.1519/JSC.0b013e3181b3e182&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.amazon.com/Don-Mattinglys-Hitting-Simple-Batting/dp/0312366205&#34;&gt;Mattingly, D., &amp;amp; Rosenthal, J. (2007). Don Mattingly’s hitting is simple: The ABCs of batting .300. Griffin, NY: St Martin’s.&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pubmed/21993034&#34;&gt;Shalfawi, S. A., Sabbah, A., Kailani, G., Tonnessen, E., &amp;amp; Enoksen, E. (2011). The relationship between running speed and measures of vertical jump in professional basketball players: A field-test approach. Journal of Strength and Conditioning Research, 25(11), 3088-3092.&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.researchgate.net/publication/8153735_The_Importance_of_Isometric_Maximum_Strength_and_Peak_Rate-of-Force_Development_in_Sprint_Cycling&#34;&gt;Stone, M.H., Sands, W.A., Carlock, J., Callan, S., Dickie, D., … (2004). The importance of isometric maximum strength and peak rate of force development in sprint cycling. Journal of Strength and Conditioning Research, 18(4), 878-874.&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

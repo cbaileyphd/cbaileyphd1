@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/tags/r/</link>
+      <atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
+    <description>R</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Sat, 09 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>R</title>
+      <link>/tags/r/</link>
+    </image>
+    
+    <item>
+      <title>Variability and Measure Magnitude in Performance Data</title>
+      <link>/post/variability-and-measure-magnitude-in-performance-data/</link>
+      <pubDate>Sat, 09 Mar 2019 00:00:00 +0000</pubDate>
+      <guid>/post/variability-and-measure-magnitude-in-performance-data/</guid>
+      <description>
+
+
+&lt;div id=&#34;getting-started-with-monitoring-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Getting started with monitoring data&lt;/h2&gt;
+&lt;p&gt;Initially, we shoud be primarily concerned with reliability. Like me, you probably pick assessments that have shown to be reliable and valid previously in research. But, you should also continuously evaluate your own reliability. If you are completing your own analysis and producing your own visualizations in R, you can build this into your code somewhat easily. Next we might evaluate our data for normality if we are going to perform any statistical analyses that depend on normality.&lt;/p&gt;
+&lt;p&gt;One place that is quite often missed in our initial data screening and analysis is something that heavily influences reliability and validity. It is probably more of an issue than many of us realize because it is so rarely evaluated. I am talking about heteroscedasticity (sometimes spelled with a k). Heteroscedasticity essentially means that the specific variable or key performance indicator (KPI) may vary unequally depending on the measure size. A realy high value may have more variation or the opposite could be true with low values. If we are not testing for this, we are essentially assuming homosecdasticity (equal variance regardless of measure magnitude). Since we deal with human performance data, we may often see extreme values (very high or very low) values on a regular basis. But, if are data are heteroscedastic, maybe we shouldn’t be too confident in the validity and reliability of that data. This post is going to be dealing with and detecting this issue. This can be tested for statistically fairly quickly with some R packages (for example, lmtest or gvlma) and probably with other statistical software as well, but I will show how to see it visually as well. Visualizing it likely helps us understand it further, even if it takes a little longer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The data&lt;/h2&gt;
+&lt;p&gt;We’ll start by reading in the data and calling on some specific packages that we will use. This data set is from 35 NCAA DIII baseball players who performed 2 maximal effort countermovement jump trials. This specific testing data was selected because it is the first of the year. This was the first time jumping off a force plate for probably all of the new players. If there was going to be an issue with reliability, one should expect it to be early on, with reliability increasing somewhat as athletes become more familiar with jump testing. This seems to be particularly true for the new athletes who aren’t used to jumping without an armswing.&lt;/p&gt;
+&lt;p&gt;The jump analysis has already been performed and a table was created to give us the mean of the trials for each variable as well as the individual trials. Names and body mass have been removed. The other variables include jump height (JH), peak power (PP), rate of force development (RFD), peak propulsive force (PF), and peak landing force (PLF). They are being rounded to 2 decimal places.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(data.table)
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+p &amp;lt;- fread(&amp;quot;~/Desktop/BaseballCMJData.csv&amp;quot;)
+p&amp;lt;-select(p, -Athlete, -Mass)
+p&amp;lt;-round(p, 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As discussed earlier, we should start by evaluating reliability. Here, I’ll look at relative reliability with ICCs.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ICC)
+ICCdf&amp;lt;-fread(&amp;quot;~/Desktop/BaseballCMJData1.csv&amp;quot;)
+ICCdf$Athlete&amp;lt;- as.factor(ICCdf$Athlete)
+JH&amp;lt;-ICCest(Athlete, JH, data = ICCdf, alpha = 0.05, CI.type = c(&amp;quot;THD&amp;quot;, &amp;quot;Smith&amp;quot;))
+PP&amp;lt;-ICCest(Athlete, PP, data = ICCdf, alpha = 0.05, CI.type = c(&amp;quot;THD&amp;quot;, &amp;quot;Smith&amp;quot;))
+RFD&amp;lt;-ICCest(Athlete, RFD, data = ICCdf, alpha = 0.05, CI.type = c(&amp;quot;THD&amp;quot;, &amp;quot;Smith&amp;quot;))
+PF&amp;lt;-ICCest(Athlete, PF, data = ICCdf, alpha = 0.05, CI.type = c(&amp;quot;THD&amp;quot;, &amp;quot;Smith&amp;quot;))
+PLF&amp;lt;-ICCest(Athlete, PLF, data = ICCdf, alpha = 0.05, CI.type = c(&amp;quot;THD&amp;quot;, &amp;quot;Smith&amp;quot;))
+ICCresults&amp;lt;-data.frame(JH=JH$ICC, PP=PP$ICC, RFD=RFD$ICC, PF=PF$ICC, PLF=PLF$ICC) ##Note that I am specifically only calling the ICC part of the ICCest values produced. As a result, I will not see the 95% confidcence intervals of those values. You should look at those, I am only doing that here because it takes up less screen space. 
+ICCresults&amp;lt;-ICCresults %&amp;gt;%
+  mutate_if(is.numeric, ~round(., 3))
+knitr::kable(ICCresults)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;JH&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PP&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;RFD&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PF&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PLF&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;0.771&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.9&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.845&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.913&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.633&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Here we see that PLF is the least reliable variable (ICC = 0.633, [0.387 - 0.796]), but all the rest might be considered acceptable &amp;gt;0.7. You don’t see the 95%CI’s in the table because I excluded them to make it more readable. If you call the ICCest result of each variable, you would get the full information.&lt;/p&gt;
+&lt;p&gt;Now we can look at absolute reliability measures, in this case, coefficients of variation (CV). The CV is just the ratio of the standard deviation to the mean. It is multiplied by 100 to be represented as a percent. This can also be done with the sjstats package cv function as done below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;jhCV&amp;lt;-sjstats::cv(p$JH)*100
+ppCV&amp;lt;-sjstats::cv(p$PP)*100
+rfdCV&amp;lt;-sjstats::cv(p$RFD)*100
+pfCV&amp;lt;-sjstats::cv(p$PF)*100
+plfCV&amp;lt;-sjstats::cv(p$PLF)*100
+
+CV&amp;lt;-data.frame(JH = jhCV, PP = ppCV, RFD = rfdCV, PF = pfCV, PLF = plfCV)
+CV&amp;lt;-round(CV,2)
+knitr::kable(CV)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;JH&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PP&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;RFD&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PF&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PLF&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;16.34&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;13.19&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;65.06&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;21.85&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;22.84&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;We would like the CVs to be lower than 15%, so we obviously have some violations here. But keep in mind this is the first day of a weekly monitoring protocol, so these values may decrease and become acceptable as time goes on. I would wait a few weeks before making a decision about throwing variables out.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;heteroscedasticity&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Heteroscedasticity&lt;/h2&gt;
+&lt;p&gt;First, lets add in the intraindividual differences between trials for each variable. We will use these to see if those who produce very large or very small values have the same chance to vary as those who do not.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p$JHdiff&amp;lt;-abs(p$JH1-p$JH2)
+p$PPdiff&amp;lt;-abs(p$PP1-p$PP2)
+p$RFDdiff&amp;lt;-abs(p$RFD1-p$RFD2)
+p$PFdiff&amp;lt;-abs(p$PF1-p$PF2)
+p$PLFdiff&amp;lt;-abs(p$PLF1-p$PLF2)
+head(p)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##       JH   JH1   JH2      PP     PP1     PP2      RFD     RFD1     RFD2      PF
+## 1: 33.80 33.41 34.19 4095.96 4078.19 4113.72  2769.87  2072.99  3466.74 2043.99
+## 2: 37.57 38.59 36.56 5056.99 5123.89 4990.09 12230.43  8051.97 16408.89 2928.29
+## 3: 30.11 30.53 29.68 4186.75 4216.04 4157.45  2557.01  2851.88  2262.15 2035.20
+## 4: 36.45 34.32 38.59 3934.84 3809.79 4059.88  2253.66  2165.22  2342.10 1826.65
+## 5: 31.29 32.78 29.80 4164.87 4260.65 4069.09  4124.39  3483.75  4765.04 2533.76
+## 6: 27.32 27.67 26.97 3415.35 3436.63 3394.07 10571.72 10996.40 10147.04 2747.53
+##        PF1     PF2     PLF    PLF1    PLF2 JHdiff PPdiff RFDdiff PFdiff PLFdiff
+## 1: 1924.08 2163.89 7922.00 8473.38 7370.61   0.78  35.53 1393.75 239.81 1102.77
+## 2: 2750.66 3105.91 7053.33 6797.44 7309.22   2.03 133.80 8356.92 355.25  511.78
+## 3: 2105.46 1964.95 6341.77 6689.75 5993.79   0.85  58.59  589.73 140.51  695.96
+## 4: 1794.86 1858.44 6139.69 6705.91 5573.46   4.27 250.09  176.88  63.58 1132.45
+## 5: 2368.84 2698.67 5819.41 5814.65 5824.17   2.98 191.56 1281.29 329.83    9.52
+## 6: 2770.85 2724.20 4203.07 3730.65 4675.48   0.70  42.56  849.36  46.65  944.83&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;start-visually&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Start visually&lt;/h3&gt;
+&lt;p&gt;Let’s visually evaluate for the presence of heteroscedasticity by plotting the individual differences against the means. This is essentially creating a linear model where the measure variance (i.e. JHdiff) is being predicted by the measure magnitude (mean of the variable trials). If the data are homoscedastic (equal chance of variablity no matter what the measure magnitude is), then the data that aren’t clustered around the linear model should not have any trend. If the data are heteroscedastic, then a trend may be visible (more variance at either high or low values). If you were to draw an outline of all the data points and the shape is a rectangle, then the data are likely homoscedastic. If the shape resembles more of a triangle/funnel with the data close to the line at one side and more spread out along the other, then the data are likely heteroscedastic. Let’s take a look.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(p, aes(JH,JHdiff))+geom_point()+ geom_smooth(method=&amp;#39;lm&amp;#39;) +
+  theme_minimal() +
+  ggtitle(&amp;quot;Jump Height (cm)&amp;quot;) +
+  ylab(&amp;quot;Residuals&amp;quot;) +
+  xlab(&amp;quot;JH means&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-03-09-variability-and-measure-magnitude-in-performance-data_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Using geom_encircle from the ggalt package, I may be able to better display what I mean by outlining the data and its shape. This step likely is not necessaary once the point is understood.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggalt)
+ggplot(p, aes(JH,JHdiff))+geom_point()+ geom_smooth(method=&amp;#39;lm&amp;#39;) +
+  theme_minimal() +
+  ggtitle(&amp;quot;Jump Height (cm)&amp;quot;) +
+  ylab(&amp;quot;Residuals&amp;quot;) +
+  xlab(&amp;quot;JH means&amp;quot;) + 
+  geom_encircle()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-03-09-variability-and-measure-magnitude-in-performance-data_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In this way we can see how the shape is more broad toward the higher jump height values. This is also a good opportunity to see how a couple of data points (in the top right) might be able skew our interpretation. But there are still quite a few others that deviate from the model below that as well. This may visually indicate that jump height is heteroscedastic, but statistical evidence is necessary to confirm this.&lt;/p&gt;
+&lt;p&gt;Let’s do the same thing with another variable (peak power).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(p, aes(PP,PPdiff))+geom_point()+ geom_smooth(method=&amp;#39;lm&amp;#39;) +
+  theme_minimal() +
+  ggtitle(&amp;quot;Peak Power (watts)&amp;quot;) +
+  ylab(&amp;quot;Residuals&amp;quot;) +
+  xlab(&amp;quot;PP means&amp;quot;) + 
+  geom_encircle()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-03-09-variability-and-measure-magnitude-in-performance-data_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here we can see that the shape is more rectangular. There are a few points deviating from the model, but not necessarily trended toward either end. This should visually indicate that peak power in this sample is homoscedastic.&lt;/p&gt;
+&lt;p&gt;Now let’s look at all the data plotted.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;gridExtra::grid.arrange(JH, PP, RFD, PF, PLF)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-03-09-variability-and-measure-magnitude-in-performance-data_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looking at the plots, we can definitely see that there are some data points that deviate away from the models. Specifically looking at peak landing force, there may be a noticeable trend in that those that land with the highest forces also have the most measurement variaability.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;add-in-some-statistics&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Add in some statistics&lt;/h2&gt;
+&lt;p&gt;Now let’s add some statistical evidince with a Breusch-Pagan test from the lmtest package. We’ll start with jump height. We first need to create a linear model predicting the measure variance by the measure magnitude, similar to the plots above.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(lmtest)
+##Create the model
+JHm&amp;lt;-lm(p$JHdiff~p$JH)
+##run the Breusch-Pagan test on the model
+bptest(JHm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  studentized Breusch-Pagan test
+## 
+## data:  JHm
+## BP = 8.8708, df = 1, p-value = 0.002898&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That statistically significant value of 0.002898 (&amp;lt;0.01) indicates that we do have heteroscedasticity in JH. We are rejecting the null hypothesis that heteroscedasticity is not present. This is a decent sample size with 35 baseball players, but it looks like we have a couple of data points that may be skewing the results as noted earlier. Give it a few weeks and this may go away. That being said, this could be an actual issue given the other points deviating from the model. A larger sample would help to either confirm or reject this notion.&lt;/p&gt;
+&lt;p&gt;It’s also worth noting that there is an easier way to plot the linear model than was done above. It’s not quite as pretty, but it’s faster if you’ve already created the model. Once the model has been created plot(modelname) will produce several plots of the model. The first plot shows the residual values plotted against the fitted model pretty much identically to the ones above.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mfrow=c(2,2))
+plot(JHm)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-03-09-variability-and-measure-magnitude-in-performance-data_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can also check to see how great our model is (predicting the amount of variablity in JH by the measure magnitude).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(JHm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Call:
+## lm(formula = p$JHdiff ~ p$JH)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.8702 -1.7817 -0.4153  0.6675  8.9286 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&amp;gt;|t|)   
+## (Intercept) -5.92921    3.03027  -1.957  0.05889 . 
+## p$JH         0.25081    0.09024   2.779  0.00892 **
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
+## 
+## Residual standard error: 2.851 on 33 degrees of freedom
+## Multiple R-squared:  0.1897, Adjusted R-squared:  0.1651 
+## F-statistic: 7.725 on 1 and 33 DF,  p-value: 0.008921&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Our model fit is statistically significant (p = 0.008921), but it is also important to evaluate its practical significance. It only has an adjusted-R squared of 0.165, so we can predict 16.5% of the variance’s variance by the measure magnitude alone.&lt;/p&gt;
+&lt;p&gt;Let’s look at the rest of the BPtest results. Here’s peak power.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(lmtest)
+PPm&amp;lt;-lm(p$PPdiff~p$PP)
+bptest(PPm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  studentized Breusch-Pagan test
+## 
+## data:  PPm
+## BP = 2.1369, df = 1, p-value = 0.1438&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;RFD&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(lmtest)
+RFDm&amp;lt;-lm(p$RFDdiff~p$RFD)
+bptest(RFDm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  studentized Breusch-Pagan test
+## 
+## data:  RFDm
+## BP = 3.9686, df = 1, p-value = 0.04636&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We are close with RFD, or we may have evidence of heteroscedasticity depending on the critical value you chose (p&amp;lt;0.01 or p&amp;lt;0.05)&lt;/p&gt;
+&lt;p&gt;PF&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(lmtest)
+PFm&amp;lt;-lm(p$PFdiff~p$PF)
+bptest(PFm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  studentized Breusch-Pagan test
+## 
+## data:  PFm
+## BP = 3.6578, df = 1, p-value = 0.05581&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and finally peak landing force (PLF)&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(lmtest)
+PLFm&amp;lt;-lm(p$PLFdiff~p$PLF)
+bptest(PLFm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  studentized Breusch-Pagan test
+## 
+## data:  PLFm
+## BP = 7.9904, df = 1, p-value = 0.004703&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It is interesting that we do contain heteroscedasticity in PLF. Given landing force’s generally unreliable nature, I would have assumed the chance to vary was the same (very high) no matter the magnitude. This may also be influenced by the usage of an instantaneous measure as opposed to something like impulse or RFD. Let’s check to see how great of a model this one is.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(PLFm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Call:
+## lm(formula = p$PLFdiff ~ p$PLF)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1118.10  -441.17   -20.17   390.32  1689.70 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&amp;gt;|t|)   
+## (Intercept) -447.37061  524.35643  -0.853   0.3997   
+## p$PLF          0.25229    0.09202   2.742   0.0098 **
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
+## 
+## Residual standard error: 681.2 on 33 degrees of freedom
+## Multiple R-squared:  0.1855, Adjusted R-squared:  0.1608 
+## F-statistic: 7.517 on 1 and 33 DF,  p-value: 0.009796&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Again, it is statistically significant, but does not have a huge R squared value.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;practical-application&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Practical Application&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;We should evaluate performance data to determine if it is reliable and determine if our data vary in a predictable way.&lt;/li&gt;
+&lt;li&gt;We may have evidence that elite performers or poor performers may have a better chance at producing errors.&lt;/li&gt;
+&lt;li&gt;If elite athletes (who produce data towards the extremes on normal data distributions) have a greater chance to produce errors, we may be making decisions based on bad data.
+&lt;ul&gt;
+&lt;li&gt;Evaluation of data for heteroscedasticity is likely more important in performance monitoring of high level athletes.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Data transformation may reduce the presence of heteroscedasticity, but may not be practical if the resulting values are not logical.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+&lt;img src=&#34;https://media.giphy.com/media/12jnTh8Dp0cFJS/200.gif&#34; /&gt;&lt;!-- --&gt;
+&lt;font size=&#34;2&#34;&gt;giphy.com&lt;/font&gt;
+&lt;/center&gt;
+&lt;br&gt;
+&lt;center&gt;
+&lt;a href=&#34;https://twitter.com/CBaileyPhD&#34;&gt;follow me on Twitter&lt;/a&gt;
+&lt;/center&gt;
+&lt;center&gt;
+&lt;a href=&#34;http://cbaileyphd.com/&#34;&gt;personal website&lt;/a&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Making sense of student evaluations: A data science/text mining approach</title>
+      <link>/post/making-sense-of-student-evaluations-a-data-science-text-mining-approach/</link>
+      <pubDate>Thu, 20 Dec 2018 00:00:00 +0000</pubDate>
+      <guid>/post/making-sense-of-student-evaluations-a-data-science-text-mining-approach/</guid>
+      <description>
+&lt;script src=&#34;/rmarkdown-libs/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/wordcloud2/wordcloud.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/wordcloud2/wordcloud2-all.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/rmarkdown-libs/wordcloud2/hover.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/rmarkdown-libs/wordcloud2-binding/wordcloud2.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;p&gt;After every semester I find myself in the same situation, reading through student evaluations and comments trying to find some value in them. The quantitative section may be seemingly straightforward, with higher values being better, but they are often compared to and normalized to other courses that are completely different from yours. But at least they are objective. I usually struggle the most with the comments section. They always seem to be equal parts encouraging, frustrating, and contradicting. Encouraging comments usually provide some affirmation of my teaching methods, frustrating ones usually provide the opposite or say that my course is boring, and then I usually get a few comments that make no sense or contradict themselves. An example of each from this semester is below.&lt;/p&gt;
+&lt;div id=&#34;encouraging-examples&#34; class=&#34;section level5&#34;&gt;
+&lt;h5&gt;Encouraging examples:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;“I enjoyed the lab work. This helped explain the aspects taught in the class and allowed students to see and feel the results themselves.”
+&lt;ul&gt;
+&lt;li&gt;I have a very similar statement in my syllabus as to why we do in class activities. I try to focus on applied learning and we have a lot of in class activities.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;“he made you feel like you’re the one doing the lab tests even if it was just in the classroom. He was very interactive towards the students”&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;discouraging-example&#34; class=&#34;section level5&#34;&gt;
+&lt;h5&gt;Discouraging example:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;“very little class interaction during lecture”
+&lt;ul&gt;
+&lt;li&gt;I try to have an in class activity during every lecture that reinforces what we are discussing and hopefully encourages interaction. I walk around from group to group discussing the assignment and hopefully get a feel for how students are grasping the concepts. So this comment is frustrating.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;contradicting-example&#34; class=&#34;section level5&#34;&gt;
+&lt;h5&gt;Contradicting example:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;“This class was much more difficult than anticipated. I was intending for it to be my”leisure class&#34; as my course load this semester is rather intense, but that was not the case.&#34;
+&lt;ul&gt;
+&lt;li&gt;This was for a senior level course called “Quantitative Analysis.”&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-problem&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The problem&lt;/h2&gt;
+&lt;p&gt;It is very easy for me to only consider specific comments and forget all the other ones. This could be due to confirmation bias after reading a good comment or my frustration over a bad comment. Either way, it is difficult to get an overall course summary on what I did well and what needs to change from open ended statements.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;a-data-science-based-solution-text-mining&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;A Data Science based solution: Text Mining&lt;/h2&gt;
+&lt;p&gt;I recently learned about text mining and sentiment analysis in R and I’ve been looking for a real world opportunity to use it. Actually that was only part of my motivation for this. After seeing the word “boring” multiple times in my Quantitative Analysis course comments, I thought it would be funny if I made a wordcloud and that was one of the biggest words (meaning it was one of the most commonly appearing words). I thought I could frame the results and use it as motivation for future course development.&lt;/p&gt;
+&lt;p&gt;This is actually quite easy to do in R. Much like analyzing other data in R, you need to be able to read it in a format that is tab or comma delimited. I did this by copying and pasting all my comments into a text editor (Sublime Text) and saving it as a .txt file. After that everything was completed in R. I will share the results here, with my code imbedded in case you want to do this for your own courses or for some other application.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wordcloud&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://i.ibb.co/vw2SwVT/wc1.png&#34; /&gt;&lt;!-- --&gt;&lt;/p&gt;
+&lt;p&gt;I’ll show the finished product first. As you can see “boring” wasn’t one of the most used word. Many of the words are consistent with my teaching style. I try to focus on applied learning with labs and in class activities, so those words appear a lot. Other words appear that likely should have been filtered out since they are part of the course name. In this course, Exercise Testing and Prescription, the title likely results in the words “exercise” and “testing” usage frequency being inflated. My name probably should have been filtered out also.&lt;/p&gt;
+&lt;p&gt;##How the sauce is made
+Let’s take a look at how this is done and we can dive a little deeper as well. For this project we will need the tm and wordcloud2 packages.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tm)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: NLP&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(wordcloud2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we need to read our data in.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;EXRX_cloud&amp;lt;-readLines(&amp;quot;KINE4320.txt&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now this needs to be converted to a corpus so that it can be manipulated.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;EXRX_corpus&amp;lt;-Corpus(VectorSource(EXRX_cloud))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At this stage it would be a good idea to inspect() your corpus to make sure everything shows up correctly, but I am not going to do that here as it would be a lot of lines.&lt;/p&gt;
+&lt;p&gt;Currently, my corpus is set up is with line numbers, lots of punctuation (sometimes not), capitalized letters, and some other things that won’t work well for a wordcloud. So we will clean that up in the next few steps with the map function in the tm package.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##convert everythhing to lowercase
+EXRX_clean_corpus &amp;lt;- tm_map(EXRX_corpus,tolower)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_corpus, tolower): transformation drops
+## documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##remove the comment numbers. You should also notice that I am now using EXRX_clean_corpus inside of the map function and will be from now on.
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, removeNumbers)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removeNumbers): transformation
+## drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##remove the punctuation
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, removePunctuation)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removePunctuation):
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##Get rid of extra spaces
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, stripWhitespace)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, stripWhitespace):
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##remove stop words (the, that, etc.)
+EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, removeWords, stopwords())&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removeWords, stopwords()):
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##I am commenting out the next line of code, because I do not want to stem the document, but that is a common practice when creating a wordcloud. What stemming will do is shortening words to their roots and then combining all of those. From experience doing this, it doesn&amp;#39;t work well in this scenario. For example &amp;#39;statistics&amp;#39; becomes &amp;#39;statist&amp;#39; and those are very different things. So if you want to do that, here&amp;#39;s how you would.
+##EXRX_clean_corpus&amp;lt;- tm_map(EXRX_clean_corpus, stemDocument)
+
+#Lastly, there are some words that aren&amp;#39;t necessarily stop words, but I don&amp;#39;t want them being counted. So I am factoring those out here.
+EXRX_clean_corpus&amp;lt;-tm_map(EXRX_clean_corpus, removeWords, c(&amp;quot;class&amp;quot;, &amp;quot;yes&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in tm_map.SimpleCorpus(EXRX_clean_corpus, removeWords, c(&amp;quot;class&amp;quot;, :
+## transformation drops documents&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is another point were you should use the tm inspect function to check your work. Again, I’m not going to do it here because it will take up a lot of space. But you should inspect(EXRX_clean_corpus).&lt;/p&gt;
+&lt;p&gt;Now we can create the wordcloud. I am using the wordcloud2 package that will create this as html, but the wordcloud package will also work.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;##turn the corpus we&amp;#39;ve been working with into a term document matrix
+tdm &amp;lt;- TermDocumentMatrix(EXRX_clean_corpus)
+l &amp;lt;- as.matrix(tdm)
+##sort it and make it a data frame
+x &amp;lt;- sort(rowSums(l),decreasing=TRUE)
+p &amp;lt;- data.frame(word = names(x),freq=x)
+#check it out
+head(p)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##              word freq
+## labs         labs   14
+## concepts concepts   11
+## students students   11
+## nothing   nothing   11
+## testing   testing   10
+## learning learning    9&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can see the frequency of words used.&lt;/p&gt;
+&lt;p&gt;Let’s make the actual wordcloud. It’s simple from this point. Since it is .html instead of a .png or .jpg, you can hover over each word to get the frequency of use.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wordcloud2(p)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:672px;height:480px;&#34; class=&#34;wordcloud2 html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;word&#34;:[&#34;labs&#34;,&#34;concepts&#34;,&#34;students&#34;,&#34;nothing&#34;,&#34;testing&#34;,&#34;learning&#34;,&#34;lectures&#34;,&#34;activities&#34;,&#34;assignments&#34;,&#34;none&#34;,&#34;information&#34;,&#34;think&#34;,&#34;lot&#34;,&#34;hands&#34;,&#34;really&#34;,&#34;powerpoints&#34;,&#34;help&#34;,&#34;many&#34;,&#34;apply&#34;,&#34;just&#34;,&#34;new&#34;,&#34;feel&#34;,&#34;lab&#34;,&#34;exercise&#34;,&#34;examples&#34;,&#34;material&#34;,&#34;helpful&#34;,&#34;review&#34;,&#34;detracted&#34;,&#34;helped&#34;,&#34;work&#34;,&#34;learned&#34;,&#34;methods&#34;,&#34;questions&#34;,&#34;exam&#34;,&#34;take&#34;,&#34;great&#34;,&#34;test&#34;,&#34;suggestions&#34;,&#34;understand&#34;,&#34;allowed&#34;,&#34;enjoyed&#34;,&#34;already&#34;,&#34;thinking&#34;,&#34;ways&#34;,&#34;interactive&#34;,&#34;like&#34;,&#34;made&#34;,&#34;tests&#34;,&#34;way&#34;,&#34;future&#34;,&#34;real&#34;,&#34;learn&#34;,&#34;bailey&#34;,&#34;good&#34;,&#34;online&#34;,&#34;given&#34;,&#34;notes&#34;,&#34;lecture&#34;,&#34;able&#34;,&#34;semester&#34;,&#34;group&#34;,&#34;stay&#34;,&#34;classes&#34;,&#34;book&#34;,&#34;exams&#34;,&#34;answers&#34;,&#34;maybe&#34;,&#34;least&#34;,&#34;practice&#34;,&#34;ideas&#34;,&#34;field&#34;,&#34;going&#34;,&#34;research&#34;,&#34;sure&#34;,&#34;aspects&#34;,&#34;taught&#34;,&#34;content&#34;,&#34;seen&#34;,&#34;things&#34;,&#34;introduced&#34;,&#34;different&#34;,&#34;informative&#34;,&#34;equipment&#34;,&#34;one&#34;,&#34;involved&#34;,&#34;actually&#34;,&#34;course&#34;,&#34;interesting&#34;,&#34;intellectually&#34;,&#34;provided&#34;,&#34;stimulating&#34;,&#34;much&#34;,&#34;practical&#34;,&#34;setting&#34;,&#34;world&#34;,&#34;inclass&#34;,&#34;beneficial&#34;,&#34;explained&#34;,&#34;well&#34;,&#34;complete&#34;,&#34;gave&#34;,&#34;based&#34;,&#34;ability&#34;,&#34;instructor&#34;,&#34;make&#34;,&#34;better&#34;,&#34;required&#34;,&#34;icas&#34;,&#34;fast&#34;,&#34;hard&#34;,&#34;presentation&#34;,&#34;along&#34;,&#34;speech&#34;,&#34;simply&#34;,&#34;available&#34;,&#34;day&#34;,&#34;slides&#34;,&#34;seemed&#34;,&#34;necessarily&#34;,&#34;grasp&#34;,&#34;sometimes&#34;,&#34;loved&#34;,&#34;wouldve&#34;,&#34;slower&#34;,&#34;suggest&#34;,&#34;topics&#34;,&#34;overall&#34;,&#34;however&#34;,&#34;info&#34;,&#34;ask&#34;,&#34;teach&#34;,&#34;can&#34;,&#34;half&#34;,&#34;exact&#34;,&#34;may&#34;,&#34;time&#34;,&#34;knowledge&#34;,&#34;specific&#34;,&#34;keep&#34;,&#34;homework&#34;,&#34;facts&#34;,&#34;explain&#34;,&#34;results&#34;,&#34;see&#34;,&#34;actions&#34;,&#34;basic&#34;,&#34;behind&#34;,&#34;broke&#34;,&#34;eyes&#34;,&#34;opened&#34;,&#34;scenes&#34;,&#34;action&#34;,&#34;clinic&#34;,&#34;gym&#34;,&#34;ive&#34;,&#34;say&#34;,&#34;stretched&#34;,&#34;wouldnt&#34;,&#34;programs&#34;,&#34;created&#34;,&#34;scenarios&#34;,&#34;common&#34;,&#34;mostly&#34;,&#34;particularly&#34;,&#34;sense&#34;,&#34;utilization&#34;,&#34;classroom&#34;,&#34;even&#34;,&#34;towards&#34;,&#34;youre&#34;,&#34;physiology&#34;,&#34;got&#34;,&#34;leave&#34;,&#34;tested&#34;,&#34;use&#34;,&#34;techniques&#34;,&#34;important&#34;,&#34;insight&#34;,&#34;various&#34;,&#34;especially&#34;,&#34;details&#34;,&#34;explanations&#34;,&#34;body&#34;,&#34;never&#34;,&#34;stretch&#34;,&#34;assist&#34;,&#34;career&#34;,&#34;others&#34;,&#34;brought&#34;,&#34;kinesiology&#34;,&#34;previous&#34;,&#34;life&#34;,&#34;used&#34;,&#34;related&#34;,&#34;excited&#34;,&#34;love&#34;,&#34;matter&#34;,&#34;missed&#34;,&#34;personal&#34;,&#34;since&#34;,&#34;thats&#34;,&#34;explaining&#34;,&#34;using&#34;,&#34;modules&#34;,&#34;blanks&#34;,&#34;canvas&#34;,&#34;creates&#34;,&#34;incentivizes&#34;,&#34;present&#34;,&#34;uploads&#34;,&#34;printing&#34;,&#34;versus&#34;,&#34;ica&#34;,&#34;contributed&#34;,&#34;independence&#34;,&#34;actual&#34;,&#34;calculations&#34;,&#34;chose&#34;,&#34;sports&#34;,&#34;whether&#34;,&#34;devices&#34;,&#34;procedure&#34;,&#34;throughout&#34;,&#34;diagnostic&#34;,&#34;aided&#34;,&#34;materiel&#34;,&#34;subjects&#34;,&#34;tough&#34;,&#34;understandable&#34;,&#34;person&#34;,&#34;visual&#34;,&#34;aspect&#34;,&#34;attending&#34;,&#34;fill&#34;,&#34;discussed&#34;,&#34;solve&#34;,&#34;engaging&#34;,&#34;fun&#34;,&#34;worksheets&#34;,&#34;blazed&#34;,&#34;entire&#34;,&#34;talked&#34;,&#34;teacher&#34;,&#34;dry&#34;,&#34;drystyle&#34;,&#34;energy&#34;,&#34;extra&#34;,&#34;interested&#34;,&#34;put&#34;,&#34;reason&#34;,&#34;similarly&#34;,&#34;follow&#34;,&#34;mixed&#34;,&#34;back&#34;,&#34;looking&#34;,&#34;usefull&#34;,&#34;vauge&#34;,&#34;distracting&#34;,&#34;didnt&#34;,&#34;due&#34;,&#34;miss&#34;,&#34;top&#34;,&#34;attendance&#34;,&#34;credit&#34;,&#34;sort&#34;,&#34;wish&#34;,&#34;powerpoint&#34;,&#34;best&#34;,&#34;debatable&#34;,&#34;equally&#34;,&#34;method&#34;,&#34;somewhat&#34;,&#34;times&#34;,&#34;alternatives&#34;,&#34;answer&#34;,&#34;managed&#34;,&#34;pictures&#34;,&#34;purchase&#34;,&#34;reading&#34;,&#34;confusing&#34;,&#34;wording&#34;,&#34;difficult&#34;,&#34;focused&#34;,&#34;gone&#34;,&#34;pertain&#34;,&#34;discussing&#34;,&#34;supposed&#34;,&#34;topic&#34;,&#34;working&#34;,&#34;assignment&#34;,&#34;giving&#34;,&#34;graded&#34;,&#34;prepared&#34;,&#34;providing&#34;,&#34;analyze&#34;,&#34;example&#34;,&#34;monotonous&#34;,&#34;enthusiasm&#34;,&#34;hurt&#34;,&#34;little&#34;,&#34;wouldn’t&#34;,&#34;clients&#34;,&#34;every&#34;,&#34;everything&#34;,&#34;trainers&#34;,&#34;thursday&#34;,&#34;adding&#34;,&#34;also&#34;,&#34;break&#34;,&#34;fiveminute&#34;,&#34;somewhere&#34;,&#34;though&#34;,&#34;allow&#34;,&#34;continuing&#34;,&#34;decompress&#34;,&#34;focus&#34;,&#34;higher&#34;,&#34;level&#34;,&#34;maintain&#34;,&#34;part&#34;,&#34;second&#34;,&#34;absolutely&#34;,&#34;classpowerpoints&#34;,&#34;covered&#34;,&#34;choose&#34;,&#34;differnt&#34;,&#34;extremly&#34;,&#34;professor&#34;,&#34;relatable&#34;,&#34;understanding&#34;,&#34;smart&#34;,&#34;instruction&#34;,&#34;supplemental&#34;,&#34;harder&#34;,&#34;job&#34;,&#34;presented&#34;,&#34;prof&#34;,&#34;teaching&#34;,&#34;everybody&#34;,&#34;needed&#34;,&#34;goes&#34;,&#34;instances&#34;,&#34;something&#34;,&#34;excel&#34;,&#34;expecting&#34;,&#34;show&#34;,&#34;thorough&#34;,&#34;wasnt&#34;,&#34;constructed&#34;,&#34;improving&#34;,&#34;advance&#34;,&#34;scheduled&#34;,&#34;week&#34;,&#34;majority&#34;,&#34;observe&#34;,&#34;realistic&#34;,&#34;cool&#34;,&#34;definitely&#34;,&#34;generally&#34;,&#34;get&#34;,&#34;thought&#34;,&#34;’d&#34;,&#34;careers&#34;,&#34;carry&#34;,&#34;hybrid&#34;,&#34;come&#34;,&#34;error&#34;,&#34;less&#34;,&#34;matching&#34;,&#34;room&#34;,&#34;situations&#34;,&#34;specificity&#34;,&#34;stem&#34;,&#34;theres&#34;,&#34;reasoning&#34;,&#34;requirements&#34;,&#34;scenario&#34;,&#34;handson&#34;,&#34;learners&#34;,&#34;getting&#34;,&#34;led&#34;,&#34;unclear&#34;,&#34;wrong&#34;,&#34;afternoon&#34;,&#34;courses&#34;,&#34;extend&#34;,&#34;interval&#34;,&#34;morning&#34;,&#34;till&#34;,&#34;usually&#34;,&#34;leads&#34;,&#34;skipping&#34;,&#34;application&#34;,&#34;concise&#34;,&#34;still&#34;,&#34;reword&#34;,&#34;instead&#34;,&#34;long&#34;,&#34;stuff&#34;,&#34;aside&#34;,&#34;find&#34;,&#34;ica’s&#34;,&#34;task&#34;,&#34;amount&#34;,&#34;aware&#34;,&#34;despite&#34;,&#34;improvement&#34;,&#34;lesser&#34;,&#34;mentioned&#34;,&#34;overwhelming&#34;,&#34;prepare&#34;,&#34;provide&#34;,&#34;retaining&#34;,&#34;section&#34;,&#34;sheet&#34;,&#34;upcoming&#34;,&#34;view&#34;,&#34;weighed&#34;,&#34;listing&#34;,&#34;wonderful&#34;,&#34;engagement&#34;,&#34;grades&#34;,&#34;improve&#34;,&#34;involve&#34;],&#34;freq&#34;:[14,11,11,11,10,9,9,8,8,8,7,7,6,6,6,6,6,5,5,5,5,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],&#34;fontFamily&#34;:&#34;Segoe UI&#34;,&#34;fontWeight&#34;:&#34;bold&#34;,&#34;color&#34;:&#34;random-dark&#34;,&#34;minSize&#34;:0,&#34;weightFactor&#34;:12.8571428571429,&#34;backgroundColor&#34;:&#34;white&#34;,&#34;gridSize&#34;:0,&#34;minRotation&#34;:-0.785398163397448,&#34;maxRotation&#34;:0.785398163397448,&#34;shuffle&#34;:true,&#34;rotateRatio&#34;:0.4,&#34;shape&#34;:&#34;circle&#34;,&#34;ellipticity&#34;:0.65,&#34;figBase64&#34;:null,&#34;hover&#34;:null},&#34;evals&#34;:[],&#34;jsHooks&#34;:{&#34;render&#34;:[{&#34;code&#34;:&#34;function(el,x){\n                        console.log(123);\n                        if(!iii){\n                          window.location.reload();\n                          iii = False;\n\n                        }\n  }&#34;,&#34;data&#34;:null}]}}&lt;/script&gt;
+This looks pretty cool and it is a good way to visualize key terms used frequently. The size of the words are representative of the amount of times they were used. This should sound familiar to a bar plot from a visualization standpoint. A bar plot may not be as visually appealing, and it won’t be able to display near as many words, but it’s arguably easier to interpret.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;barplot(p[1:10,]$freq, las = 2, names.arg = p[1:10,]$word,
+        col =&amp;quot;springgreen&amp;quot;, main =&amp;quot;Most frequent words&amp;quot;,
+        ylab = &amp;quot;Word frequencies&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2018-12-20-making-sense-of-student-evaluations-a-data-science-text-mining-approach_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Most of this makes since. I focus a lot on applied learning in this class so they do a lot of “in class actvities” and labs. I probably should have filtered out the words “nothing” and “detracted” since they are responding to a question about what detracted from their learning at one point. Many of those answers were “nothing.”&lt;/p&gt;
+&lt;p&gt;The last bit of exploratory analysis that I will do is correlation. I will specifically look for the words that are most correlated with these words that appear the most and I will set a limit of 0.3 (low end of moderate r value), so that I only see words that correlate higher than that. I will start with the word “labs,” since it is the most commonly used word.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;findAssocs(tdm, terms = &amp;quot;labs&amp;quot;, corlimit = 0.3)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $labs
+##    hands  excited     love   matter   missed personal    since    thats 
+##     0.60     0.50     0.50     0.50     0.50     0.50     0.50     0.50 
+##      one 
+##     0.34&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looking at the results, this mostly makes sense. I’m assuming “hands” was part of “hands on” before the corpus was cleaned. The words “excited” and “love” being associated with “labs” is probably a good thing. But the word “missed” being associated at the same value (r = 0.50) means that at least a few people made comments about missing labs.&lt;/p&gt;
+&lt;p&gt;For me, this is a much more objective way to interpret my evaluations with the added benefit of removing any potential bias I may have when I just read through the comments. This only really works with large classes and if you have a high response rate on your evaluations. If you have a small class size or a small number of responses, this really isn’t necessary.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Bat Swing GRF Part 2: Analysis in R</title>
+      <link>/post/bat-swing-grf-part-2-analysis-in-r/</link>
+      <pubDate>Wed, 28 Nov 2018 00:00:00 +0000</pubDate>
+      <guid>/post/bat-swing-grf-part-2-analysis-in-r/</guid>
+      <description>
+
+
+&lt;p&gt;Prior to analysis, these trials have already been cleaned. By that I mean that only the force production necessary for this movement are present in the data. There is no blank space or data with the athletes simply standing on the force plate. As a result of that, the analysis is much easier, but the force values of each force plate cannot be summed since the time has been altered (trimmed at the beginning or the end). Each athlete in this data set completed 3 trials and I’ve removed the name of one of them so it can be used as an example here.&lt;/p&gt;
+&lt;div id=&#34;read-your-data-in&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Read your data in&lt;/h2&gt;
+&lt;p&gt;First we need to read in the file. You can name assign it whatever name you want. I always pick something short.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;F1&amp;lt;-read.csv(&amp;quot;Player1.csv&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next, since these force plates are biaxial (vertical (GRFz) and mediolateral (GRFx) in this case), I want to get the resultant force produced. I’ll do that with Pythagorean theorem and assign it to a variable name for each trial and each leg (drive leg (DL) and stride leg (SL).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;get-the-resultant-forces&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Get the resultant forces&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;F1$DLRes1&amp;lt;-sqrt(F1$GRFzDL1^2 + F1$GRFxDL1^2)
+F1$SLRes1&amp;lt;-sqrt(F1$GRFzSL1^2 + F1$GRFxSL1^2)
+F1$DLRes2&amp;lt;-sqrt(F1$GRFzDL2^2 + F1$GRFxDL2^2)
+F1$SLRes2&amp;lt;-sqrt(F1$GRFzSL2^2 + F1$GRFxSL2^2)
+F1$DLRes3&amp;lt;-sqrt(F1$GRFzDL3^2 + F1$GRFxDL3^2)
+F1$SLRes3&amp;lt;-sqrt(F1$GRFzSL3^2 + F1$GRFxSL3^2)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;calculating-the-variables-of-interest&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Calculating the variables of interest&lt;/h2&gt;
+&lt;p&gt;Now lets get to performing the analysis. Caluclating peak force (PPF) is fairly simple. We will also calclate the time when it occurs (PFt), which we will need for the RFD calculation later. This is also fairly simple in that we are asking for the time which the resultant force is equal to the varialbe we just assigned to PPF or peak force. The only trick here is the addition of the [1]-1 at the end. The reason that is there is so that we pull the first occurence of this event. If the same exact value appears more than once, your code will throw an error. This does happen sometimes with consecutive values when you sample at high rates. Adding this in will prevent those issues.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PF &amp;lt;- max(F1$DLRes1, na.rm = TRUE)
+print(PF)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 894.4183&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PFt &amp;lt;- F1$Time1[which(F1$DLRes1==PF)[1]-1] &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now let’s work on RFD. This will be calculated as the slope of the line from the initial force produced to the peak force. So this will be rise over run (change in force/change in time). Meaning we will need to calculate those first. We will start with the initial force produced (FInit) and the time at which it is produced (FInitT). Here we are simply calling for the first value and then for the time which that force value occurs.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;FInit&amp;lt;- F1$DLRes1[1]
+FInitT &amp;lt;- F1$Time1[which(F1$DLRes1==FInit)]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We already have the time which PF occurs, so now we just need to calculate the chage in Force and the change in time and divide them. Again, we’ll print RFD to check it.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;changeT &amp;lt;- PFt + FInitT
+changeF &amp;lt;- PF - FInit
+RFD &amp;lt;- changeF/changeT
+print(RFD)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 1463.233&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To calculate impulse, we will need the minimum values (force and time) which occur at the end of the drive leg f/t curve when the weight shift occurs. We need this as an end point marker to get the area under the curce (AUC). The time when the minimum force occurs will need to have the [1]-1 at the end similar to the PFt variable.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Fmin &amp;lt;- min(F1$DLRes1,na.rm = TRUE)
+Fmint &amp;lt;- F1$Time1[which(F1$DLRes1==Fmin)[1]-1]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can caluclate the AUC with the help of the MESS package. In order to calculate it, we will need several arguments including: what are the x and y values, from what point to what point do we want to calculate the area for and the type. Force-time curves are almost always set up with time on the x axis and force on the y axis, so that gives us the information for the first part. The from and to are going to be the initial time and minimum time already assigned. We will use linear for the type.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(MESS)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: geepack&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: geeM&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: Matrix&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Impulse &amp;lt;- auc(F1$Time1, F1$DLRes1, from = FInitT, to = Fmint, type = c(&amp;quot;linear&amp;quot;))
+print(Impulse)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 555.1382&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That’s pretty much it for the drive leg. This can be repeated for additional trials, but you’ll need to change the assignments slightly. I do this with numbers at the end, and sometimes letters (b to indicate stride leg).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PF2 &amp;lt;- max(F1$DLRes2, na.rm = TRUE)
+PFt2 &amp;lt;- F1$Time2[which(F1$DLRes2==PF2)[1]-1]                     
+FInit2&amp;lt;- F1$DLRes2[1]
+FInitT2 &amp;lt;- F1$Time2[which(F1$DLRes2==FInit2)]
+Fmin2 &amp;lt;- min(F1$DLRes2,na.rm = TRUE)
+Fmint2 &amp;lt;- F1$Time2[which(F1$DLRes2==Fmin2)[1]-1]
+changeT2 &amp;lt;- PFt2 + FInitT2
+changeF2 &amp;lt;- PF2 - FInit2
+RFD2 &amp;lt;- changeF2/changeT2
+Impulse2 &amp;lt;- auc(F1$Time2, F1$DLRes2, from = FInitT2, to = Fmint2, type = c(&amp;quot;linear&amp;quot;))
+
+PF3 &amp;lt;- max(F1$DLRes3, na.rm = TRUE)
+PFt3 &amp;lt;- F1$Time3[which(F1$DLRes3==PF3)[1]-1]                     
+FInit3&amp;lt;- F1$DLRes3[1]
+FInitT3 &amp;lt;- F1$Time3[which(F1$DLRes3==FInit3)]
+Fmin3 &amp;lt;- min(F1$DLRes3,na.rm = TRUE)
+Fmint3 &amp;lt;- F1$Time3[which(F1$DLRes3==Fmin3)[1]-1]
+changeT3 &amp;lt;- PFt3 + FInitT3
+changeF3 &amp;lt;- PF3 - FInit3
+RFD3 &amp;lt;- changeF3/changeT3
+Impulse3 &amp;lt;- auc(F1$Time3, F1$DLRes3, from = FInitT3, to = Fmint3, type = c(&amp;quot;linear&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The stride leg is almost identical in analysis, but the impulse arguments will need to be changed. Specifically, we want to get the area from the initial force produced to the final time since these trials have already been cleaned. That is acheived by the max(F1$Timeb) command.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PF1b &amp;lt;- max(F1$SLRes1, na.rm = TRUE)
+PFt1b &amp;lt;- F1$Time1b[which(F1$SLRes1==PF1b)[1]-1]                     
+FInit1b&amp;lt;- F1$SLRes1[1]
+FInitT1b &amp;lt;- F1$Time1b[which(F1$SLRes1==FInit1b)]
+Fmin1b &amp;lt;- min(F1$SLRes1,na.rm = TRUE)
+Fmint1b &amp;lt;- F1$Time1b[which(F1$SLRes1==Fmin1b)]
+changeT1b &amp;lt;- PFt1b + FInitT1b
+changeF1b &amp;lt;- PF1b - FInit1b
+RFD1b &amp;lt;- changeF1b/changeT1b
+Impulse1b &amp;lt;- auc(F1$Time1b, F1$SLRes1, from = FInitT1b, to = max(F1$Time1b, na.rm = TRUE), type = c(&amp;quot;linear&amp;quot;))
+
+PF2b &amp;lt;- max(F1$SLRes2, na.rm = TRUE)
+PFt2b &amp;lt;- F1$Time2b[which(F1$SLRes2==PF2b)[1]-1]                     
+FInit2b&amp;lt;- F1$SLRes2[1]
+FInitT2b &amp;lt;- F1$Time2b[which(F1$SLRes2==FInit2b)]
+Fmin2b &amp;lt;- min(F1$SLRes2,na.rm = TRUE)
+Fmint2b &amp;lt;- F1$Time2b[which(F1$SLRes2==Fmin2b)]
+changeT2b &amp;lt;- PFt2b + FInitT2b
+changeF2b &amp;lt;- PF2b - FInit2b
+RFD2b &amp;lt;- changeF2b/changeT2b
+Impulse2b &amp;lt;- auc(F1$Time2b, F1$SLRes2, from = FInitT2b, to = max(F1$Time2b, na.rm = TRUE), type = c(&amp;quot;linear&amp;quot;))
+
+PF3b &amp;lt;- max(F1$SLRes3, na.rm = TRUE)
+PFt3b &amp;lt;- F1$Time3b[which(F1$SLRes3==PF3b)[1]-1]                     
+FInit3b&amp;lt;- F1$SLRes3[1]
+FInitT3b &amp;lt;- F1$Time3b[which(F1$SLRes3==FInit3b)]
+Fmin3b &amp;lt;- min(F1$SLRes3,na.rm = TRUE)
+Fmint3b &amp;lt;- F1$Time3b[which(F1$SLRes3==Fmin3b)]
+changeT3b &amp;lt;- PFt3b + FInitT3b
+changeF3b &amp;lt;- PF3b - FInit3b
+RFD3b &amp;lt;- changeF3b/changeT3b
+Impulse3b &amp;lt;- auc(F1$Time3b, F1$SLRes3, from = FInitT3b, to = max(F1$Time3b, na.rm = TRUE), type = c(&amp;quot;linear&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;getting-the-means-combining-them-into-a-data-frame&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Getting the means &amp;amp; combining them into a data frame&lt;/h2&gt;
+&lt;p&gt;Now, we need to get the average of the 3 trials for each variable. I do that when I put it into a data frame for each leg.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Player1DL&amp;lt;- data.frame(DL.PF = (PF+PF2+PF3)/3,
+                      DL.RFD = (RFD+RFD2+RFD3)/3,
+                      DL.Impulse = (Impulse+Impulse2+Impulse3)/3)
+
+Player1SL&amp;lt;- data.frame(SL.PF = (PF1b+PF2b+PF3b)/3,
+                       SL.RFD = (RFD1b+RFD2b+RFD3b)/3,
+                       SL.Impulse = (Impulse1b+Impulse2b+Impulse3b)/3)
+
+print(Player1DL)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      DL.PF   DL.RFD DL.Impulse
+## 1 895.8249 1371.313   569.6043&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can combine these into one data frame.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Player1&amp;lt;-cbind(Player1DL, Player1SL)
+print(Player1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      DL.PF   DL.RFD DL.Impulse    SL.PF   SL.RFD SL.Impulse
+## 1 895.8249 1371.313   569.6043 1204.453 3972.014   326.8253&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;combining-individual-players-data-together-and-creating-a-summary-file&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Combining individual players’ data together and creating a summary file&lt;/h2&gt;
+&lt;p&gt;That’s pretty much it. It’s now just wash, rinse, and repeat for additional players. Then if want to combine all their data into one data frame, you can do so with the row bind command and separate each player name by a comma. I only have one here, because that’s all I’m using in this example.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Data &amp;lt;- data.frame(rbind(Player1))
+##this should be the same as above since we didn&amp;#39;t add any additional players.
+print(Data)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      DL.PF   DL.RFD DL.Impulse    SL.PF   SL.RFD SL.Impulse
+## 1 895.8249 1371.313   569.6043 1204.453 3972.014   326.8253&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can then write your data to a csv file if you wish. It will save in your working directory or wherever you wish if you indicate the file path.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;write.csv(Data,file = &amp;#39;BatswingGRFData.csv&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

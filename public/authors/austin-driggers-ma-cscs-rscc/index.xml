@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Austin Driggers, MA, CSCS, RSCC | Chris Bailey, PhD, CSCS*D, RSCC</title>
+    <link>/authors/austin-driggers-ma-cscs-rscc/</link>
+      <atom:link href="/authors/austin-driggers-ma-cscs-rscc/index.xml" rel="self" type="application/rss+xml" />
+    <description>Austin Driggers, MA, CSCS, RSCC</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Fri, 21 Dec 2018 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>img/map[gravatar:%!s(bool=false) shape:circle]</url>
+      <title>Austin Driggers, MA, CSCS, RSCC</title>
+      <link>/authors/austin-driggers-ma-cscs-rscc/</link>
+    </image>
+    
+    <item>
+      <title>The Relationship of Throwing Arm Mechanics and Elbow Varus Torque: Letter to the Editor</title>
+      <link>/publication/ltemotus/</link>
+      <pubDate>Fri, 21 Dec 2018 00:00:00 +0000</pubDate>
+      <guid>/publication/ltemotus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>A New Method For The Evaluation And Prediction Of Base Stealing Performance</title>
+      <link>/publication/basestealing/</link>
+      <pubDate>Tue, 01 Mar 2016 00:00:00 +0000</pubDate>
+      <guid>/publication/basestealing/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
