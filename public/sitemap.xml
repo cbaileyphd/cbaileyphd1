@@ -3,36 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/courses/example/example1/</loc>
-    <lastmod>2019-05-05T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/example/</loc>
-    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/example/example2/</loc>
-    <lastmod>2019-05-05T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2030-06-01T13:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/talk/example/</loc>
-    <lastmod>2030-06-01T13:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/talk/</loc>
-    <lastmod>2030-06-01T13:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/authors/admin/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
@@ -44,6 +14,11 @@
   
   <url>
     <loc>/authors/</loc>
+    <lastmod>2019-12-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
     <lastmod>2019-12-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -153,12 +128,12 @@
   </url>
   
   <url>
-    <loc>/tags/data-science/</loc>
+    <loc>/categories/data-science/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/data-science/</loc>
+    <loc>/tags/data-science/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url>
   
@@ -170,16 +145,6 @@
   <url>
     <loc>/post/variability-and-measure-magnitude-in-performance-data/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/slides/</loc>
-    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/slides/example/</loc>
-    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -198,12 +163,12 @@
   </url>
   
   <url>
-    <loc>/tags/education/</loc>
+    <loc>/categories/education/</loc>
     <lastmod>2018-12-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/education/</loc>
+    <loc>/tags/education/</loc>
     <lastmod>2018-12-20T00:00:00+00:00</lastmod>
   </url>
   
@@ -265,31 +230,6 @@
   <url>
     <loc>/authors/tim-mcinnis-phd-cscs-rscc/</loc>
     <lastmod>2016-09-12T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/deep-learning/</loc>
-    <lastmod>2016-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/demo/</loc>
-    <lastmod>2016-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/external-project/</loc>
-    <lastmod>2016-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/internal-project/</loc>
-    <lastmod>2016-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/</loc>
-    <lastmod>2016-04-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -363,21 +303,6 @@
   </url>
   
   <url>
-    <loc>/publication_types/1/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/conference-paper/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/authors/robert-ford/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/publication/ipfsi/</loc>
     <lastmod>2013-04-24T00:00:00+00:00</lastmod>
   </url>
@@ -385,20 +310,6 @@
   <url>
     <loc>/authors/ryan-alexander/</loc>
     <lastmod>2013-04-24T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/publication_types/3/</loc>
-    <lastmod>2011-04-07T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/preprint/</loc>
-    <lastmod>2011-04-07T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/</loc>
   </url>
   
 </urlset>
